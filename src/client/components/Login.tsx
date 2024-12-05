@@ -54,7 +54,7 @@ const Login = () => {
     };
 
     return (
-        <div className="flex justify-center items-center h-screen bg-gray-100">
+        <div className="flex justify-center items-start h-screen bg-gray-100 mt-14">
             <div className="bg-white p-8 rounded-md shadow-lg w-full max-w-md">
                 <h2 className="text-2xl font-bold mb-6 text-center">Login</h2>
                 {error && <Alert severity="error" className="mb-4">{error}</Alert>}
