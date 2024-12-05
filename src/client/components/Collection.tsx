@@ -7,6 +7,7 @@ import { faBookmark as regularBookmark } from '@fortawesome/free-regular-svg-ico
 import { useUser } from '../context/userContext';
 import useFetchTags from '../hooks/useFetchTags';
 import TagSelector from './TagSelector';
+import { useNavigate } from "react-router-dom";
 
 interface Instructor {
     name: string;
@@ -37,6 +38,13 @@ const Collection: React.FC = () => {
     const [selectedTagIds, setSelectedTagIds] = useState<number[]>([]);
     const { userId } = useUser();
     const { tags, error: tagsError } = useFetchTags();
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        if (!userId) {
+            navigate('/login');
+        }
+    }, [userId, navigate])
 
     const getYouTubeEmbedUrl = (url: string) => {
         const youtubeRegex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/]+\/.*|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;

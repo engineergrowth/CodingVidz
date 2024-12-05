@@ -3,6 +3,7 @@ import axios from 'axios';
 import { CircularProgress, Button } from '@mui/material';
 import { useUser } from '../context/userContext';
 import PostModal from './modals/PostModal';
+import { useNavigate } from 'react-router-dom';
 
 interface Post {
     id: number;
@@ -14,6 +15,7 @@ interface Post {
     tags: { tag: { id: number; name: string } }[];
 }
 
+
 const MyPosts: React.FC = () => {
     const [posts, setPosts] = useState<Post[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
@@ -21,6 +23,13 @@ const MyPosts: React.FC = () => {
     const [selectedPost, setSelectedPost] = useState<Post | null>(null);
     const [openModal, setOpenModal] = useState<boolean>(false);
     const { userId } = useUser();
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        if (!userId) {
+            navigate('/login');
+        }
+    }, [userId, navigate])
 
     const userIdAsNumber = userId ? parseInt(userId) : null;
 

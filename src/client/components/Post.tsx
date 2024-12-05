@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import { useEffect, useState } from 'react';
 import axios from 'axios';
 import TagSelector from './TagSelector';
 import useFetchTags from '../hooks/useFetchTags';
 import { useUser } from '../context/userContext';
 import { TextField, Button } from '@mui/material';
+import { useNavigate } from "react-router-dom";
 
 const PostForm: React.FC = () => {
     const { userId, token } = useUser();
@@ -13,6 +14,13 @@ const PostForm: React.FC = () => {
     const [instructorName, setInstructorName] = useState('');
     const [tags, setTags] = useState<number[]>([]);
     const { tags: allTags, error } = useFetchTags();
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        if (!userId) {
+            navigate('/login');
+        }
+    }, [userId, navigate])
 
     const handleTagChange = (selectedTagIds: number[]) => {
         setTags(selectedTagIds);
@@ -21,16 +29,13 @@ const PostForm: React.FC = () => {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        // Check if user is authenticated
         if (!userId || !token) {
             console.error('User not authenticated');
             return;
         }
 
-        // Convert userId to integer
         const userIdInt = parseInt(userId, 10);
 
-        // Log the form data that will be sent
         console.log('Form Data to Send:', {
             title,
             video_url: videoUrl,
@@ -41,7 +46,6 @@ const PostForm: React.FC = () => {
         });
 
         try {
-            // Send POST request to create a new post
             const response = await axios.post(
                 'http://localhost:3000/posts',
                 {
