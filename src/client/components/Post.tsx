@@ -15,6 +15,7 @@ const PostForm: React.FC = () => {
     const [tags, setTags] = useState<number[]>([]);
     const { tags: allTags, error } = useFetchTags();
     const navigate = useNavigate();
+    const apiUrl = process.env.REACT_APP_API_URL;
 
     useEffect(() => {
         if (!userId) {
@@ -47,7 +48,7 @@ const PostForm: React.FC = () => {
 
         try {
             const response = await axios.post(
-                'http://localhost:3000/posts',
+                '${apiUrl}/posts',
                 {
                     title,
                     video_url: videoUrl,
@@ -63,8 +64,6 @@ const PostForm: React.FC = () => {
                 }
             );
 
-            // Log the response from the server
-            console.log('Post created:', response.data);
         } catch (error) {
             console.error('Error creating post:', error);
         }

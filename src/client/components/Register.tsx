@@ -13,6 +13,7 @@ const Register = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
+    const apiUrl = process.env.REACT_APP_API_URL;
 
     const { setUser } = useUser();
 
@@ -39,7 +40,7 @@ const Register = () => {
         }
 
         try {
-            const response = await axios.post("http://localhost:3000/auth/register", {
+            const response = await axios.post("${apiUrl}/auth/register", {
                 username,
                 email,
                 password,

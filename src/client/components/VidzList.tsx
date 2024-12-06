@@ -39,6 +39,7 @@ const VidzList: React.FC = () => {
     const [sortOption, setSortOption] = useState<string>('newest');
     const { userId } = useUser();
     const { tags, error: tagsError } = useFetchTags();
+    const apiUrl = process.env.REACT_APP_API_URL;
 
 
     // Extracts the video ID from a YouTube URL to construct an embed URL
@@ -55,12 +56,12 @@ const VidzList: React.FC = () => {
     useEffect(() => {
         const fetchPosts = async () => {
             try {
-                const response = await axios.get<Post[]>('http://localhost:3000/posts');
+                const response = await axios.get<Post[]>('${apiUrl}/posts');
                 setPosts(response.data);
 
                 if (userId) {
                     console.log(userId)
-                    const bookmarksResponse = await axios.get<Bookmark[]>(`http://localhost:3000/favorites/${userId}`);
+                    const bookmarksResponse = await axios.get<Bookmark[]>(`${apiUrl}/favorites/${userId}`);
                     console.log(bookmarksResponse.data);
 
                     setBookmarkedPostIds(bookmarksResponse.data.map((b) => b.post_id));
@@ -85,7 +86,7 @@ const VidzList: React.FC = () => {
     };
 
     const handleSortChange = (event: SelectChangeEvent<string>) => {
-        setSortOption(event.target.value as string); // Type casting to string
+        setSortOption(event.target.value as string);
     };
 
     // Check if the post is bookmarked by the user and toggle bookmark state
@@ -95,10 +96,10 @@ const VidzList: React.FC = () => {
             const isBookmarked = bookmarkedPostIds.includes(postId);
 
             if (isBookmarked) {
-                await axios.delete(`http://localhost:3000/favorites/${userId}/${postId}`);
+                await axios.delete(`${apiUrl}/favorites/${userId}/${postId}`);
                 setBookmarkedPostIds(prev => prev.filter(id => id !== postId));
             } else {
-                const response = await axios.post(`http://localhost:3000/favorites/${userId}`, {
+                const response = await axios.post(`${apiUrl}/favorites/${userId}`, {
                     post_id: postId,
                 });
                 if (response.status === 201) {

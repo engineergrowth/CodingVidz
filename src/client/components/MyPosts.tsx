@@ -24,10 +24,11 @@ const MyPosts: React.FC = () => {
     const [openModal, setOpenModal] = useState<boolean>(false);
     const { userId } = useUser();
     const navigate = useNavigate();
+    const apiUrl = process.env.REACT_APP_API_URL;
 
     useEffect(() => {
         if (!userId) {
-            navigate('/login');
+            navigate('${apiUrl}/login');
         }
     }, [userId, navigate])
 
@@ -45,7 +46,7 @@ const MyPosts: React.FC = () => {
     useEffect(() => {
         const fetchPosts = async () => {
             try {
-                const response = await axios.get<Post[]>('http://localhost:3000/posts');
+                const response = await axios.get<Post[]>('${apiUrl}/posts');
                 setPosts(response.data);
             } catch (err) {
                 setError('Failed to fetch posts');
@@ -87,7 +88,7 @@ const MyPosts: React.FC = () => {
                 const finalPostData = { ...postData, user_id: userIdAsNumber };
 
                 const response = await axios.put(
-                    `http://localhost:3000/posts/${postId}`,
+                    `${apiUrl}/posts/${postId}`,
                     finalPostData
                 );
 
@@ -108,7 +109,7 @@ const MyPosts: React.FC = () => {
 
     const handleDelete = async (postId: number) => {
         try {
-            await axios.delete(`http://localhost:3000/posts/${postId}`);
+            await axios.delete(`${apiUrl}/posts/${postId}`);
             setPosts(posts.filter(post => post.id !== postId)); // Remove deleted post from state
         } catch (err) {
             setError('Failed to delete post');

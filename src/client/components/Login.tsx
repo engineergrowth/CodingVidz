@@ -16,6 +16,7 @@ const Login = () => {
 
     const { setUser } = useUser();
     const navigate = useNavigate();
+    const apiUrl = process.env.REACT_APP_API_URL;
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -26,7 +27,7 @@ const Login = () => {
         console.log({ email, password });
 
         try {
-            const response = await axios.post("http://localhost:3000/auth/login", {
+            const response = await axios.post("${apiUrl}/auth/login", {
                 email,
                 password,
             });
@@ -41,7 +42,7 @@ const Login = () => {
                 localStorage.setItem("token", token);
 
                 setSuccess("Login successful!");
-                navigate("/vidz");
+                navigate("${apiUrl}/vidz");
             } else {
                 setError("Login failed, try again.");
             }
