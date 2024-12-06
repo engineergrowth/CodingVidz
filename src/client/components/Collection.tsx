@@ -39,7 +39,8 @@ const Collection: React.FC = () => {
     const { userId } = useUser();
     const { tags, error: tagsError } = useFetchTags();
     const navigate = useNavigate();
-    const apiUrl = process.env.REACT_APP_API_URL;
+    const apiUrl = import.meta.env.VITE_API_URL;
+
 
     useEffect(() => {
         if (!userId) {
@@ -59,7 +60,7 @@ const Collection: React.FC = () => {
     useEffect(() => {
         const fetchPosts = async () => {
             try {
-                const response = await axios.get<Post[]>('${apiUrl}/posts');
+                const response = await axios.get<Post[]>(`${apiUrl}/posts`);
                 setPosts(response.data);
 
                 if (userId) {

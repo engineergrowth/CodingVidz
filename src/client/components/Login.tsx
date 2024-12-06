@@ -16,7 +16,8 @@ const Login = () => {
 
     const { setUser } = useUser();
     const navigate = useNavigate();
-    const apiUrl = process.env.REACT_APP_API_URL;
+    const apiUrl = import.meta.env.VITE_API_URL;
+
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -27,7 +28,7 @@ const Login = () => {
         console.log({ email, password });
 
         try {
-            const response = await axios.post("${apiUrl}/auth/login", {
+            const response = await axios.post(`${apiUrl}/auth/login`, {
                 email,
                 password,
             });
@@ -42,7 +43,7 @@ const Login = () => {
                 localStorage.setItem("token", token);
 
                 setSuccess("Login successful!");
-                navigate("${apiUrl}/vidz");
+                navigate(`${apiUrl}/vidz`);
             } else {
                 setError("Login failed, try again.");
             }

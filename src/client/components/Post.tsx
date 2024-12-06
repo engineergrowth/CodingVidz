@@ -15,7 +15,8 @@ const PostForm: React.FC = () => {
     const [tags, setTags] = useState<number[]>([]);
     const { tags: allTags, error } = useFetchTags();
     const navigate = useNavigate();
-    const apiUrl = process.env.REACT_APP_API_URL;
+    const apiUrl = import.meta.env.VITE_API_URL;
+
 
     useEffect(() => {
         if (!userId) {
@@ -48,7 +49,7 @@ const PostForm: React.FC = () => {
 
         try {
             const response = await axios.post(
-                '${apiUrl}/posts',
+                `${apiUrl}/posts`,
                 {
                     title,
                     video_url: videoUrl,
@@ -68,7 +69,6 @@ const PostForm: React.FC = () => {
             console.error('Error creating post:', error);
         }
     };
-
 
     return (
         <form onSubmit={handleSubmit} className="max-w-xl mx-auto p-6 space-y-4">

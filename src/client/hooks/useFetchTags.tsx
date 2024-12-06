@@ -9,11 +9,13 @@ interface Tag {
 const useFetchTags = () => {
     const [tags, setTags] = useState<Tag[]>([]);
     const [error, setError] = useState<string | null>(null);
+    const apiUrl = import.meta.env.VITE_API_URL;
+
 
     useEffect(() => {
         const fetchTags = async () => {
             try {
-                const response = await axios.get<Tag[]>('http://localhost:3000/tags');
+                const response = await axios.get<Tag[]>(`${apiUrl}/tags`);
 
                 if (Array.isArray(response.data)) {
                     setTags(response.data);

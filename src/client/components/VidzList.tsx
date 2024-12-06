@@ -29,7 +29,6 @@ interface Bookmark {
     post_id: number;
 }
 
-
 const VidzList: React.FC = () => {
     const [posts, setPosts] = useState<Post[]>([]);
     const [bookmarkedPostIds, setBookmarkedPostIds] = useState<number[]>([]);
@@ -39,7 +38,7 @@ const VidzList: React.FC = () => {
     const [sortOption, setSortOption] = useState<string>('newest');
     const { userId } = useUser();
     const { tags, error: tagsError } = useFetchTags();
-    const apiUrl = process.env.REACT_APP_API_URL;
+    const apiUrl = import.meta.env.VITE_API_URL;
 
 
     // Extracts the video ID from a YouTube URL to construct an embed URL
@@ -56,14 +55,11 @@ const VidzList: React.FC = () => {
     useEffect(() => {
         const fetchPosts = async () => {
             try {
-                const response = await axios.get<Post[]>('${apiUrl}/posts');
+                const response = await axios.get<Post[]>(`${apiUrl}/posts`);
                 setPosts(response.data);
 
                 if (userId) {
-                    console.log(userId)
                     const bookmarksResponse = await axios.get<Bookmark[]>(`${apiUrl}/favorites/${userId}`);
-                    console.log(bookmarksResponse.data);
-
                     setBookmarkedPostIds(bookmarksResponse.data.map((b) => b.post_id));
                 } else {
                     console.warn('No userId provided for fetching bookmarks.');

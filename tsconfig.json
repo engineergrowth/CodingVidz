@@ -9,10 +9,24 @@
     "allowSyntheticDefaultImports": true,
     "strict": true,
     "forceConsistentCasingInFileNames": true,
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
+    "module": "ESNext",
+    "moduleResolution": "node",
     "resolveJsonModule": true,
     "isolatedModules": true,
+<<<<<<< HEAD
+    "noEmit": false,
+    "jsx": "react-jsx",
+    "baseUrl": ".",
+    "paths": {
+      "*": ["src/*"]
+    },
+    "outDir": "./dist/server"
+  },
+  "include": [
+    "src",
+    "vite.config.ts"
+  ]
+=======
     "noEmit": true,
     "typeRoots": ["node_modules/@types",
       "src/types"
@@ -20,4 +34,5 @@
   },
   "include": ["src", "types"]
 
+>>>>>>> c543af2 (changes tsconfig to debug build errors)
 }

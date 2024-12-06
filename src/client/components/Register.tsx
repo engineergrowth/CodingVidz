@@ -5,6 +5,7 @@ import CircularProgress from "@mui/material/CircularProgress";
 import Alert from "@mui/material/Alert";
 import axios from "axios";
 import { useUser } from "../context/userContext";
+import { useNavigate } from "react-router-dom";
 
 const Register = () => {
     const [username, setUsername] = useState("");
@@ -13,7 +14,9 @@ const Register = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
-    const apiUrl = process.env.REACT_APP_API_URL;
+    const navigate = useNavigate();
+    const apiUrl = import.meta.env.VITE_API_URL;
+
 
     const { setUser } = useUser();
 
@@ -40,7 +43,7 @@ const Register = () => {
         }
 
         try {
-            const response = await axios.post("${apiUrl}/auth/register", {
+            const response = await axios.post(`${apiUrl}/auth/register`, {
                 username,
                 email,
                 password,
@@ -59,6 +62,7 @@ const Register = () => {
                 setUsername("");
                 setEmail("");
                 setPassword("");
+                navigate("/vidz");
             } else {
                 setError("Invalid response from server.");
             }
