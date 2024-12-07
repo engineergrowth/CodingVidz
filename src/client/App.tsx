@@ -1,12 +1,12 @@
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
-import Login from "./components/Login";
-import Register from "./components/Register";
-import Post from "./components/Post";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+import Post from "./pages/Post";
 import { UserProvider } from "./context/userContext";
-import Collection from "./components/Collection";
+import Collection from "./pages/Collection";
 import Navbar from "./components/Navbar";
-import VidzList from "./components/VidzList";
-import MyPosts from "./components/MyPosts";
+import VidzList from "./pages/VidzList";
+import MyPosts from "./pages/MyPosts";
 
 const App = () => {
     return (

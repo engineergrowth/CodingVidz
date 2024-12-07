@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
-import TagSelector from './TagSelector';
+import TagSelector from '../components/TagSelector';
 import useFetchTags from '../hooks/useFetchTags';
 import { useUser } from '../context/userContext';
 import { TextField, Button } from '@mui/material';

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { CircularProgress, Button } from '@mui/material';
 import { useUser } from '../context/userContext';
-import PostModal from './modals/PostModal';
+import PostModal from '../components/modals/PostModal';
 import { useNavigate } from 'react-router-dom';
 
 interface Post {

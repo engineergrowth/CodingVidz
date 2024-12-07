@@ -6,7 +6,7 @@ import { faBookmark as solidBookmark } from '@fortawesome/free-solid-svg-icons';
 import { faBookmark as regularBookmark } from '@fortawesome/free-regular-svg-icons';
 import { useUser } from '../context/userContext';
 import useFetchTags from '../hooks/useFetchTags';
-import TagSelector from './TagSelector';
+import TagSelector from '../components/TagSelector';
 import { useNavigate } from "react-router-dom";
 
 interface Instructor {
