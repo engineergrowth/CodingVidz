@@ -1,45 +1,43 @@
-# Coding Vidz
-
-A full-stack video-sharing application built using React, TypeScript, Node.js, Prisma, Material UI, and TailwindCSS. Coding Vidz empowers users to share, discover, and organize coding-related videos efficiently. Designed with a robust backend and a user-friendly frontend, the app enables seamless video sharing, bookmarking, and personalized content organization.
-
 ## Features
 
-# EduTrack
+- **User Authentication**:  
+  - Secure registration and login using **JSON Web Tokens** (JWT) and **bcrypt** for password hashing.
 
-**User Authentication**:  
-- Secure registration and login using **SQLite** for user data management.
-- **.NET MAUI**'s built-in authentication services for secure user authentication.
+- **Video Tagging System**:  
+  - Add one or multiple tags to videos.
+  - Discover videos by filtering based on one or more tags.
 
-**Course and Assessment Management**:  
-- Track academic terms, courses, and assessments.
-- Add and manage courses.
-- View progress and receive notifications.
+- **Video Collection**:  
+  - Bookmark videos you like or plan to watch later, and organize your collection efficiently.
+- **CRUD Operations on Videos**:  
+  - Edit and delete your video posts.
 
 ## Technologies Used
 
-- **.NET MAUI**: Cross-platform framework for building native mobile apps.
-- **SQLite**: For local database management, storing user data, terms, courses, assessments, and notifications.
-- **NUnit**: For testing, ensuring reliability and maintainability.
+- **React**: Frontend framework for building interactive user interfaces.
+- **TypeScript**: Type-safe language for improved developer experience and error prevention.
+- **Node.js**: Backend runtime environment for building scalable server-side applications.
+- **Express**: Web framework for Node.js, handling routing and server logic.
+- **Prisma**: ORM for database interaction, making queries more efficient and type-safe.
+- **JWT (JSON Web Tokens)**: For secure authentication and user sessions.
+- **bcrypt**: For hashing and comparing user passwords securely.
 
 ## Database Schema
 
-The application uses **SQLite** for database management. Key models include:
+The application uses a **Prisma**-designed schema to manage the database. Key models include:
+- **User**: Stores user data such as email, hashed password, and authentication details.
+- **Video**: Stores video details, including the title, URL, description, and associated tags.
+- **Tag**: A tag model to categorize videos.
+- **Bookmark**: Allows users to save and organize their favorite videos.
 
-- **User**: Stores user data such as email and authentication details.
-- **Term**: Represents an academic term, managing related courses and assessments.
-- **Course**: Stores course information including title, description, and associated assessments.
-- **Assessment**: Manages tests, quizzes, and assignments related to the courses.
-- **Notification**: Manages alerts and reminders for course deadlines and assessments.
+## Screenshots
 
-## Features
+**Video Page**  
+![Video Page Screenshot](./public/screenshot.png)
 
-- **User Authentication**: Secure login and registration with **SQLite**.
-- **Course Management**: Add, update, and manage academic courses locally.
-- **Term Management**: Manage academic terms and their associated courses and assessments.
-- **Progress Tracking**: View and track your progress through assessments.
-- **Notifications**: Receive alerts for upcoming deadlines and course activities.
 
-**Screenshot**  
-![UI Screenshot](./edutrack.png)
+## Contributing
+
+Feel free to fork this repository, submit issues, and send pull requests. We would love it if you shared your bookmarks with us as well! Contributions are always welcome!
 
 
