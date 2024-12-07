@@ -1,6 +1,6 @@
 # Coding Vidz
 
-A full-stack video-sharing application built using React, TypeScript, Node.js, Prisma, Material UI, and TailwindCSS. Built in just 4 days, Coding Vidz empowers users to share, discover, and organize coding-related videos efficiently. Designed with a robust backend and a user-friendly frontend, the app enables seamless video sharing, bookmarking, and personalized content organization.
+A full-stack video-sharing application built using React, TypeScript, Node.js, Prisma, Material UI, and TailwindCSS. Coding Vidz empowers users to share, discover, and organize coding-related videos efficiently. Designed with a robust backend and a user-friendly frontend, the app enables seamless video sharing, bookmarking, and personalized content organization.
 
 ## Features
 
