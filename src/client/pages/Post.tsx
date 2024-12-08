@@ -17,7 +17,6 @@ const PostForm: React.FC = () => {
     const navigate = useNavigate();
     const apiUrl = import.meta.env.VITE_API_URL;
 
-
     useEffect(() => {
         if (!userId) {
             navigate('/login');
