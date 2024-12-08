@@ -63,7 +63,6 @@ router.post('/:user_id', async (req, res) => {
     }
 });
 
-
 router.delete('/:user_id/:post_id', async (req, res) => {
     try {
         const { user_id, post_id } = req.params;
