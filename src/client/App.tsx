@@ -1,7 +1,7 @@
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
-import Post from "./pages/Share";
+import Share from "./pages/Share";
 import { UserProvider } from "./context/userContext";
 import Collection from "./pages/Collection";
 import Navbar from "./components/Navbar";
@@ -18,7 +18,7 @@ const App = () => {
                 <Routes>
                     <Route path="/login" element={<Login />} />
                     <Route path="/register" element={<Register />} />
-                    <Route path="/post-vid" element={<Post />} />
+                    <Route path="/share" element={<Share />} />
                     <Route path="/collection" element={<Collection />} />
                     <Route path="/vidz" element={<VidzList />} />
                     <Route path="/my-posts" element={<MyPosts />} />
