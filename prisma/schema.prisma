@@ -13,10 +13,10 @@ model User {
   email     String     @unique
   password  String
   role      String     @default("user")
-  posts     Post[] // Users can have multiple posts
-  comments  Comment[] // Users can have multiple comments
-  reactions Reaction[] // Users can have multiple reactions
-  bookmarks Bookmark[] // Users can have multiple bookmarks
+  posts     Post[]
+  comments  Comment[]
+  reactions Reaction[]
+  bookmarks Bookmark[]
 }
 
 model Post {
@@ -27,34 +27,34 @@ model Post {
   views         Int         @default(0)
   created_at    DateTime    @default(now())
   user_id       Int
-  user          User        @relation(fields: [user_id], references: [id]) // Relation to User
+  user          User        @relation(fields: [user_id], references: [id])
   instructor_id Int
   instructor    Instructor  @relation(fields: [instructor_id], references: [id]) // Relation to Instructor
-  comments      Comment[] // Multiple comments can be associated with a post
-  reactions     Reaction[] // Multiple reactions can be associated with a post
-  bookmarks     Bookmark[] // Multiple bookmarks can be associated with a post
-  tags          TagOnPost[] // Many-to-many relation to Tag via TagOnPost
+  comments      Comment[]
+  reactions     Reaction[]
+  bookmarks     Bookmark[]
+  tags          TagOnPost[]
 }
 
 model Instructor {
   id    Int    @id @default(autoincrement())
   name  String @unique
-  posts Post[] // An instructor can have multiple posts
+  posts Post[]
 }
 
 model Tag {
   id         Int         @id @default(autoincrement())
   name       String      @unique
   popularity Int         @default(0)
-  posts      TagOnPost[] // Many-to-many relation to Post via TagOnPost
+  posts      TagOnPost[]
 }
 
 model TagOnPost {
   id      Int  @id @default(autoincrement())
   post_id Int
-  post    Post @relation(fields: [post_id], references: [id]) // Relation to Post
+  post    Post @relation(fields: [post_id], references: [id])
   tag_id  Int
-  tag     Tag  @relation(fields: [tag_id], references: [id]) // Relation to Tag
+  tag     Tag  @relation(fields: [tag_id], references: [id])
 }
 
 model Comment {
@@ -62,9 +62,9 @@ model Comment {
   comment    String
   created_at DateTime @default(now())
   post_id    Int
-  post       Post     @relation(fields: [post_id], references: [id]) // Relation to post
+  post       Post     @relation(fields: [post_id], references: [id])
   user_id    Int
-  user       User     @relation(fields: [user_id], references: [id]) // Relation to user
+  user       User     @relation(fields: [user_id], references: [id])
 }
 
 model Reaction {
@@ -72,17 +72,17 @@ model Reaction {
   reaction_type String
   created_at    DateTime @default(now())
   post_id       Int
-  post          Post     @relation(fields: [post_id], references: [id]) // Relation to post
+  post          Post     @relation(fields: [post_id], references: [id])
   user_id       Int
-  user          User     @relation(fields: [user_id], references: [id]) // Relation to user
+  user          User     @relation(fields: [user_id], references: [id])
 }
 
 model Bookmark {
   id      Int  @id @default(autoincrement())
   user_id Int
-  user    User @relation(fields: [user_id], references: [id]) // Relation to user
+  user    User @relation(fields: [user_id], references: [id])
   post_id Int
-  post    Post @relation(fields: [post_id], references: [id]) // Relation to post
+  post    Post @relation(fields: [post_id], references: [id])
 
-  @@unique([user_id, post_id]) // Ensure a user can only bookmark a post once
+  @@unique([user_id, post_id])
 }

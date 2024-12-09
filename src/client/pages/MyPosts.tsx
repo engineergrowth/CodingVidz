@@ -109,13 +109,26 @@ const MyPosts: React.FC = () => {
     };
 
     const handleDelete = async (postId: number) => {
+        if (!userId) {
+            console.error('User ID is null or undefined');
+            return;
+        }
+
+        const deleteUrl = `${apiUrl}/posts/${postId}?user_id=${userId}`;
+        console.log(`Deleting post at: ${deleteUrl}`);
+
         try {
-            await axios.delete(`${apiUrl}/posts/${postId}`);
-            setPosts(posts.filter(post => post.id !== postId)); // Remove deleted post from state
+            await axios.delete(deleteUrl);
+            setPosts(posts.filter((post) => post.id !== postId));
         } catch (err) {
+            console.error('Error deleting post:', err);
             setError('Failed to delete post');
         }
     };
+
+
+
+
 
     const userPosts = posts.filter(post => post.user_id === userIdAsNumber);
 

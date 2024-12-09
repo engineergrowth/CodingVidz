@@ -150,16 +150,46 @@ router.put('/:id', async (req, res) => {
 router.delete('/:id', async (req, res) => {
     try {
         const { id } = req.params;
+        const { user_id } = req.query;
 
-        await prisma.post.delete({
-            where: { id: Number(id) },
+        console.log(`Received DELETE request for post ID: ${id} by user ID: ${user_id}`);
+
+        if (!id || isNaN(Number(id))) {
+            console.error('Invalid post ID');
+            return res.status(400).json({ error: 'Invalid post ID' });
+        }
+
+        if (!user_id || isNaN(Number(user_id))) {
+            console.error('Invalid user ID');
+            return res.status(400).json({ error: 'Invalid user ID' });
+        }
+
+        const postId = Number(id);
+        const userId = Number(user_id);
+
+        // Delete the bookmark for the specific user and post
+        await prisma.bookmark.deleteMany({
+            where: {
+                user_id: userId,
+                post_id: postId,
+            },
         });
 
+        console.log(`Bookmark for user ID ${userId} and post ID ${postId} deleted successfully`);
+
+        await prisma.post.delete({
+            where: { id: postId },
+        });
+
+        console.log(`Post with ID ${postId} deleted successfully`);
         res.status(204).send();
     } catch (error) {
-        console.error(error);
+        console.error('Error while deleting post:', error);
         res.status(500).json({ error: 'Failed to delete post' });
     }
 });
+
+
+
 
 export default router;
