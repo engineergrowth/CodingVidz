@@ -146,7 +146,6 @@ router.put('/:id', async (req, res) => {
 });
 
 
-
 router.delete('/:id', async (req, res) => {
     try {
         const { id } = req.params;
@@ -159,30 +158,19 @@ router.delete('/:id', async (req, res) => {
             return res.status(400).json({ error: 'Invalid post ID' });
         }
 
-        if (!user_id || isNaN(Number(user_id))) {
-            console.error('Invalid user ID');
-            return res.status(400).json({ error: 'Invalid user ID' });
-        }
-
         const postId = Number(id);
-        const userId = Number(user_id);
 
-        // Delete the bookmarks associated with the post
-        await prisma.bookmark.deleteMany({
-            where: {
-                user_id: userId,
-                post_id: postId,
-            },
-        });
-
-        console.log(`Bookmarks for user ID ${userId} and post ID ${postId} deleted successfully`);
-
-        // Delete the tag associations for the post
-        await prisma.tagOnPost.deleteMany({
+        // Delete tag associations
+        const deletedTags = await prisma.tagOnPost.deleteMany({
             where: { post_id: postId },
         });
+        console.log(`Deleted tags:`, deletedTags);
 
-        console.log(`Tags associated with post ID ${postId} deleted successfully`);
+        // Delete bookmarks associated with the post
+        const deletedBookmarks = await prisma.bookmark.deleteMany({
+            where: { post_id: postId },
+        });
+        console.log(`Deleted bookmarks:`, deletedBookmarks);
 
         // Finally, delete the post
         await prisma.post.delete({
@@ -196,6 +184,7 @@ router.delete('/:id', async (req, res) => {
         res.status(500).json({ error: 'Failed to delete post' });
     }
 });
+
 
 
 
