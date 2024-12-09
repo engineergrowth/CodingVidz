@@ -29,7 +29,7 @@ interface Bookmark {
     post_id: number;
 }
 
-const VidzList: React.FC = () => {
+const WatchVidz: React.FC = () => {
     const [posts, setPosts] = useState<Post[]>([]);
     const [bookmarkedPostIds, setBookmarkedPostIds] = useState<number[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
@@ -137,7 +137,7 @@ const VidzList: React.FC = () => {
     }
 
     return (
-        <div className="container mx-auto p-4">
+        <div className="container mx-auto bg-gray-100">
             <div className="mb-4 flex flex-col sm:flex-row items-center justify-center sm:space-x-4">
                 <div className="w-full sm:w-64 mb-4 sm:mb-0">
                     <TagSelector tags={tags} onChange={handleTagChange} />
@@ -182,13 +182,16 @@ const VidzList: React.FC = () => {
                                 ))}
                             </div>
                             <div className="mt-4 flex justify-end">
-                                <FontAwesomeIcon
-                                    icon={bookmarkedPostIds.includes(post.id) ? solidBookmark : regularBookmark}
-                                    size="lg"
-                                    className="cursor-pointer text-blue-600"
-                                    onClick={() => toggleBookmark(post.id)}
-                                />
+                                {userId && (
+                                    <FontAwesomeIcon
+                                        icon={bookmarkedPostIds.includes(post.id) ? solidBookmark : regularBookmark}
+                                        size="lg"
+                                        className="cursor-pointer text-blue-600"
+                                        onClick={() => toggleBookmark(post.id)}
+                                    />
+                                )}
                             </div>
+
                         </div>
                     </div>
                 ))}
@@ -197,4 +200,4 @@ const VidzList: React.FC = () => {
     );
 };
 
-export default VidzList;
+export default WatchVidz;

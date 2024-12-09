@@ -3,7 +3,7 @@ import axios from 'axios';
 import TagSelector from '../components/TagSelector';
 import useFetchTags from '../hooks/useFetchTags';
 import { useUser } from '../context/userContext';
-import { TextField, Button } from '@mui/material';
+import { TextField, Button, Typography } from '@mui/material';
 import { useNavigate } from "react-router-dom";
 
 const PostForm: React.FC = () => {
@@ -13,6 +13,7 @@ const PostForm: React.FC = () => {
     const [description, setDescription] = useState('');
     const [instructorName, setInstructorName] = useState('');
     const [tags, setTags] = useState<number[]>([]);
+    const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
     const { tags: allTags, error } = useFetchTags();
     const navigate = useNavigate();
     const apiUrl = import.meta.env.VITE_API_URL;
@@ -21,7 +22,7 @@ const PostForm: React.FC = () => {
         if (!userId) {
             navigate('/login');
         }
-    }, [userId, navigate])
+    }, [userId, navigate]);
 
     const handleTagChange = (selectedTagIds: number[]) => {
         setTags(selectedTagIds);
@@ -31,20 +32,11 @@ const PostForm: React.FC = () => {
         e.preventDefault();
 
         if (!userId || !token) {
-            console.error('User not authenticated');
+            setMessage({ type: 'error', text: 'You must be logged in to create a post.' });
             return;
         }
 
         const userIdInt = parseInt(userId, 10);
-
-        console.log('Form Data to Send:', {
-            title,
-            video_url: videoUrl,
-            description,
-            user_id: userIdInt,
-            instructor_name: instructorName,
-            tags,
-        });
 
         try {
             const response = await axios.post(
@@ -64,16 +56,33 @@ const PostForm: React.FC = () => {
                 }
             );
 
+            setMessage({ type: 'success', text: 'Post created successfully!' });
+
+
+            setTimeout(() => {
+                navigate(`/watch-vidz`);
+            }, 1500);
         } catch (error) {
             console.error('Error creating post:', error);
+            setMessage({ type: 'error', text: 'There was an error creating your post. Please try again.' });
         }
     };
 
+
     return (
-        <form onSubmit={handleSubmit} className="max-w-xl mx-auto p-6 space-y-4">
+        <form onSubmit={handleSubmit} className="max-w-xl mx-auto p-6 space-y-6 bg-white shadow-md rounded-md">
+            <div className="text-center">
+                <h2 className="text-2xl font-semibold mb-2">Create a New Post</h2>
+                <p className="text-gray-600">Share your video and inspire others!</p>
+            </div>
+
             <div>
+                <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">
+                    Title
+                </label>
                 <TextField
-                    label="Title"
+                    id="title"
+                    label="Enter the title of your post"
                     variant="outlined"
                     fullWidth
                     value={title}
@@ -83,8 +92,12 @@ const PostForm: React.FC = () => {
             </div>
 
             <div>
+                <label htmlFor="video-url" className="block text-sm font-medium text-gray-700 mb-2">
+                    Video URL
+                </label>
                 <TextField
-                    label="Video URL"
+                    id="video-url"
+                    label="Paste your video link here"
                     variant="outlined"
                     fullWidth
                     value={videoUrl}
@@ -94,21 +107,28 @@ const PostForm: React.FC = () => {
             </div>
 
             <div>
+                <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
+                    Description (optional)
+                </label>
                 <TextField
-                    label="Description (optional)"
+                    id="description"
+                    label="Write a brief description of the video"
                     variant="outlined"
                     fullWidth
                     multiline
                     rows={4}
                     value={description}
                     onChange={e => setDescription(e.target.value)}
-
                 />
             </div>
 
             <div>
+                <label htmlFor="instructor-name" className="block text-sm font-medium text-gray-700 mb-2">
+                    Instructor Name
+                </label>
                 <TextField
-                    label="Instructor Name"
+                    id="instructor-name"
+                    label="Who is the instructor?"
                     variant="outlined"
                     fullWidth
                     value={instructorName}
@@ -118,6 +138,9 @@ const PostForm: React.FC = () => {
             </div>
 
             <div>
+                <label htmlFor="tags" className="block text-sm font-medium text-gray-700 mb-2">
+                    Tags
+                </label>
                 <TagSelector tags={allTags} onChange={handleTagChange} />
             </div>
 
@@ -132,6 +155,7 @@ const PostForm: React.FC = () => {
             </Button>
         </form>
     );
+
 };
 
 export default PostForm;

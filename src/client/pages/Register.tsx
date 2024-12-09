@@ -62,7 +62,7 @@ const Register = () => {
                 setUsername("");
                 setEmail("");
                 setPassword("");
-                navigate("/vidz");
+                navigate("/watch-vidz");
             } else {
                 setError("Invalid response from server.");
             }
@@ -76,7 +76,7 @@ const Register = () => {
 
 
     return (
-        <div className="flex justify-center items-start h-screen bg-gray-100 mt-14">
+        <div className="flex justify-center items-start h-screen bg-gray-100">
             <div className="bg-white p-8 rounded-md shadow-lg w-full max-w-md">
                 <h2 className="text-2xl font-bold mb-6 text-center">Register</h2>
                 {error && <Alert severity="error" className="mb-4">{error}</Alert>}

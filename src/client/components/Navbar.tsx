@@ -15,7 +15,7 @@ import MenuItem from '@mui/material/MenuItem';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '../context/userContext';
 
-const pages = ['Vidz', 'Collection', 'My Posts', 'Share'];
+const pages = ['Watch Vidz', 'Collection', 'My Posts', 'Share'];
 
 function Navbar() {
     const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(null);
@@ -132,11 +132,10 @@ function Navbar() {
                         Coding Vidz
                     </Typography>
 
-                    <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
+                    <Box sx={{ flexGrow: 1, ml:8, display: { xs: 'none', md: 'flex' } }}>
                         {pages.map((page) => {
-                            console.log('userId:', userId);
                             // Conditionally render links based on authentication
-                            if (!userId && page !== 'Vidz') {
+                            if (!userId && page !== 'Watch Vidz') {
                                 return null; // Hide restricted links for unauthenticated users
                             }
                             return (
