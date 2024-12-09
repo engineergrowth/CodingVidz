@@ -15,7 +15,7 @@ import MenuItem from '@mui/material/MenuItem';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '../context/userContext';
 
-const pages = ['Vidz', 'Collection', 'My Posts', 'Post Vid'];
+const pages = ['Vidz', 'Collection', 'My Posts', 'Share'];
 
 function Navbar() {
     const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(null);
