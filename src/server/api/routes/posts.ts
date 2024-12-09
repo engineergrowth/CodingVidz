@@ -167,7 +167,7 @@ router.delete('/:id', async (req, res) => {
         const postId = Number(id);
         const userId = Number(user_id);
 
-        // Delete the bookmark for the specific user and post
+        // Delete the bookmarks associated with the post
         await prisma.bookmark.deleteMany({
             where: {
                 user_id: userId,
@@ -175,8 +175,16 @@ router.delete('/:id', async (req, res) => {
             },
         });
 
-        console.log(`Bookmark for user ID ${userId} and post ID ${postId} deleted successfully`);
+        console.log(`Bookmarks for user ID ${userId} and post ID ${postId} deleted successfully`);
 
+        // Delete the tag associations for the post
+        await prisma.tagOnPost.deleteMany({
+            where: { post_id: postId },
+        });
+
+        console.log(`Tags associated with post ID ${postId} deleted successfully`);
+
+        // Finally, delete the post
         await prisma.post.delete({
             where: { id: postId },
         });

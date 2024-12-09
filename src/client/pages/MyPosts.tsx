@@ -115,8 +115,6 @@ const MyPosts: React.FC = () => {
         }
 
         const deleteUrl = `${apiUrl}/posts/${postId}?user_id=${userId}`;
-        console.log(`Deleting post at: ${deleteUrl}`);
-
         try {
             await axios.delete(deleteUrl);
             setPosts(posts.filter((post) => post.id !== postId));
