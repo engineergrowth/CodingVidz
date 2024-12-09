@@ -52,7 +52,7 @@ model Tag {
 model TagOnPost {
   id      Int  @id @default(autoincrement())
   post_id Int
-  post    Post @relation(fields: [post_id], references: [id])
+  post    Post @relation(fields: [post_id], references: [id], onDelete: Cascade)
   tag_id  Int
   tag     Tag  @relation(fields: [tag_id], references: [id])
 }
@@ -82,7 +82,7 @@ model Bookmark {
   user_id Int
   user    User @relation(fields: [user_id], references: [id])
   post_id Int
-  post    Post @relation(fields: [post_id], references: [id])
+  post    Post @relation(fields: [post_id], references: [id], onDelete: Cascade)
 
   @@unique([user_id, post_id])
 }
