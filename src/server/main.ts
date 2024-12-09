@@ -1,5 +1,6 @@
 import express from "express";
 import path from "path";
+import rateLimit from "express-rate-limit";
 import postsRouter from "./api/routes/posts.js";
 import authRouter from "./api/routes/auth.js";
 import tagsRouter from "./api/routes/tags.js";
@@ -12,6 +13,14 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = process.env.PORT || 8080;
 
+const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    limit: 100, // Limit each IP to 100 requests per window
+    message: { error: "Too many requests, please try again later." },
+    standardHeaders: true, // Sends rate limit info in RateLimit-* headers
+    legacyHeaders: false, // Disables the X-RateLimit-* headers
+});
+
 app.use(
     cors({
         origin: "https://codingvidz.netlify.app",
@@ -21,8 +30,10 @@ app.use(
 );
 
 app.use(express.static(path.resolve(__dirname, "../dist")));
-
 app.use(express.json());
+
+// Apply rate limiter to all routes
+app.use(limiter);
 
 app.use("/posts", postsRouter);
 app.use("/auth", authRouter);
