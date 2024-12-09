@@ -43,7 +43,7 @@ const Login = () => {
                 localStorage.setItem("token", token);
 
                 setSuccess("Login successful!");
-                navigate(`${apiUrl}/vidz`);
+                navigate(`/vidz`);
             } else {
                 setError("Login failed, try again.");
             }
