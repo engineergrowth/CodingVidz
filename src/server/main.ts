@@ -35,13 +35,6 @@ app.use(express.json());
 // Apply rate limiter to all routes
 app.use(limiter);
 
-app.use((req, res, next) => {
-    console.log(`Incoming Request: ${req.method} ${req.url}`);
-    next();
-});
-
-
-
 app.use("/posts", postsRouter);
 app.use("/auth", authRouter);
 app.use("/tags", tagsRouter);

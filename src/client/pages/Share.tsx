@@ -61,7 +61,7 @@ const PostForm: React.FC = () => {
 
             setTimeout(() => {
                 navigate(`/watch-vidz`);
-            }, 1500);
+            }, 1000);
         } catch (error) {
             console.error('Error creating post:', error);
             setMessage({ type: 'error', text: 'There was an error creating your post. Please try again.' });
@@ -72,8 +72,8 @@ const PostForm: React.FC = () => {
     return (
         <form onSubmit={handleSubmit} className="max-w-xl mx-auto p-6 space-y-6 bg-white shadow-md rounded-md">
             <div className="text-center">
-                <h2 className="text-2xl font-semibold mb-2">Create a New Post</h2>
-                <p className="text-gray-600">Share your video and inspire others!</p>
+                <h2 className="text-2xl font-semibold mb-2">Share Content</h2>
+                <p className="text-gray-600">Thank you for contributing to our community!</p>
             </div>
 
             <div>
@@ -108,7 +108,7 @@ const PostForm: React.FC = () => {
 
             <div>
                 <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
-                    Description (optional)
+                    Description (max 40 characters)
                 </label>
                 <TextField
                     id="description"
@@ -118,9 +118,16 @@ const PostForm: React.FC = () => {
                     multiline
                     rows={4}
                     value={description}
-                    onChange={e => setDescription(e.target.value)}
+                    onChange={e => {
+                        const value = e.target.value;
+                        if (value.length <= 40) {
+                            setDescription(value);
+                        }
+                    }}
+                    helperText={`${description.length}/40 characters`}
                 />
             </div>
+
 
             <div>
                 <label htmlFor="instructor-name" className="block text-sm font-medium text-gray-700 mb-2">

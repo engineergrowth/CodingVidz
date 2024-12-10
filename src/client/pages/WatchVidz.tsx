@@ -160,42 +160,46 @@ const WatchVidz: React.FC = () => {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 mt-10">
                 {filteredPosts.map(post => (
-                    <div key={post.id} className="max-w-sm mx-auto bg-white rounded-lg shadow-lg overflow-hidden">
+                    <div key={post.id}
+                         className="max-w-sm mx-auto bg-white rounded-lg shadow-lg overflow-hidden flex flex-col">
                         <iframe
                             src={getYouTubeEmbedUrl(post.video_url)}
                             title={post.title}
                             className="w-full h-56"
                             allowFullScreen
                         />
-                        <div className="p-4">
+                        <div className="p-4 flex-grow">
                             <h2 className="text-xl font-semibold mb-1">{post.title}</h2>
                             <p className="text-sm text-gray-600">{post.instructor.name}</p>
                             <p className="mt-1 text-gray-700">{post.description}</p>
-                            <div className="mt-2 flex flex-wrap gap-2">
+                        </div>
+                        {/* Tags and Bookmark row */}
+                        <div className="p-4 flex justify-between items-center mt-auto">
+                            {/* Tags on the bottom-left */}
+                            <div className="flex flex-wrap gap-2">
                                 {post.tags.map(tagRel => (
                                     <span
                                         key={tagRel.tag.id}
                                         className="text-xs px-2 py-1 bg-blue-100 text-blue-800 rounded-full"
                                     >
-                                        {tagRel.tag.name}
-                                    </span>
+                            {tagRel.tag.name}
+                        </span>
                                 ))}
                             </div>
-                            <div className="mt-4 flex justify-end">
-                                {userId && (
-                                    <FontAwesomeIcon
-                                        icon={bookmarkedPostIds.includes(post.id) ? solidBookmark : regularBookmark}
-                                        size="lg"
-                                        className="cursor-pointer text-blue-600"
-                                        onClick={() => toggleBookmark(post.id)}
-                                    />
-                                )}
-                            </div>
-
+                            {/* Bookmark on the bottom-right */}
+                            {userId && (
+                                <FontAwesomeIcon
+                                    icon={bookmarkedPostIds.includes(post.id) ? solidBookmark : regularBookmark}
+                                    size="lg"
+                                    className="cursor-pointer text-blue-600"
+                                    onClick={() => toggleBookmark(post.id)}
+                                />
+                            )}
                         </div>
                     </div>
                 ))}
             </div>
+
         </div>
     );
 };
