@@ -96,20 +96,14 @@ const PostForm: React.FC = () => {
                     Video URL
                 </label>
                 <TextField
-                    id="description"
-                    label="Write a brief description of the video"
+                    id="video-url"
+                    label="Paste your video link here"
                     variant="outlined"
                     fullWidth
-                    multiline
-                    rows={4}
-                    value={description}
-                    onChange={e => {
-                        const value = e.target.value;
-                        setDescription(value.slice(0, 40)); // Trim value to the first 40 characters
-                    }}
-                    helperText={`${description.length}/40 characters`}
+                    value={videoUrl}
+                    onChange={e => setVideoUrl(e.target.value)}
+                    required
                 />
-
             </div>
 
             <div>
@@ -126,9 +120,7 @@ const PostForm: React.FC = () => {
                     value={description}
                     onChange={e => {
                         const value = e.target.value;
-                        if (value.length <= 40) {
-                            setDescription(value);
-                        }
+                        setDescription(value.slice(0, 40)); // Trim value to the first 40 characters
                     }}
                     helperText={`${description.length}/40 characters`}
                 />
