@@ -120,10 +120,14 @@ const PostForm: React.FC = () => {
                     value={description}
                     onChange={e => {
                         const value = e.target.value;
-                        setDescription(value.slice(0, 40)); // Trim value to the first 40 characters
+                        // Remove newlines and trim spaces
+                        const sanitizedValue = value.replace(/\s+/g, ' ');
+                        // Trim to 40 characters
+                        setDescription(sanitizedValue.slice(0, 40));
                     }}
                     helperText={`${description.length}/40 characters`}
                 />
+
             </div>
 
 
