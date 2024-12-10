@@ -3,7 +3,7 @@ import axios from 'axios';
 import TagSelector from '../components/TagSelector';
 import useFetchTags from '../hooks/useFetchTags';
 import { useUser } from '../context/userContext';
-import { TextField, Button, Typography } from '@mui/material';
+import { TextField, Button } from '@mui/material';
 import { useNavigate } from "react-router-dom";
 
 const PostForm: React.FC = () => {
@@ -17,6 +17,8 @@ const PostForm: React.FC = () => {
     const { tags: allTags, error } = useFetchTags();
     const navigate = useNavigate();
     const apiUrl = import.meta.env.VITE_API_URL;
+
+    // TODO: unused consts/fix message
 
     useEffect(() => {
         if (!userId) {

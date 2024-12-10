@@ -1,28 +1,25 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { CircularProgress } from '@mui/material';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faBookmark as solidBookmark } from '@fortawesome/free-solid-svg-icons';
-import { faBookmark as regularBookmark } from '@fortawesome/free-regular-svg-icons';
 import { useUser } from '../context/userContext';
 import useFetchTags from '../hooks/useFetchTags';
+import useFilteredPosts from '../hooks/useFilteredPosts';
+import { toggleBookmark } from '../utils/bookmarkUtils';
 import TagSelector from '../components/TagSelector';
-import { useNavigate } from "react-router-dom";
-
-interface Instructor {
-    name: string;
-}
+import PostGrid from '../components/PostGrid';
+import { getYouTubeEmbedUrl } from '../utils/videoUtils';
 
 interface Post {
     id: number;
     title: string;
     description: string;
     video_url: string;
-    instructor: Instructor;
+    instructor: { name: string };
+    tags: { tag: { id: number; name: string } }[];
     likes: number;
     created_at: string;
-    tags: { tag: { id: number; name: string } }[];
 }
+
 
 interface Bookmark {
     id: number;
@@ -36,39 +33,22 @@ const Collection: React.FC = () => {
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
     const [selectedTagIds, setSelectedTagIds] = useState<number[]>([]);
+    const [selectedDescription, setSelectedDescription] = useState<string | null>(null);
+
     const { userId } = useUser();
     const { tags, error: tagsError } = useFetchTags();
-    const navigate = useNavigate();
     const apiUrl = import.meta.env.VITE_API_URL;
 
-
     useEffect(() => {
-        if (!userId) {
-            navigate('/login');
-        }
-    }, [userId, navigate])
+        if (!userId) return;
 
-    const getYouTubeEmbedUrl = (url: string) => {
-        const youtubeRegex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/]+\/.*|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
-        const match = url.match(youtubeRegex);
-        if (match && match[1]) {
-            return `https://www.youtube.com/embed/${match[1]}`;
-        }
-        return url;
-    };
-
-    useEffect(() => {
         const fetchPosts = async () => {
             try {
                 const response = await axios.get<Post[]>(`${apiUrl}/posts`);
                 setPosts(response.data);
 
-                if (userId) {
-                    const bookmarksResponse = await axios.get<Bookmark[]>(`${apiUrl}/favorites/${userId}`);
-                    setBookmarkedPostIds(bookmarksResponse.data.map((b) => b.post_id));
-                } else {
-                    console.warn('No userId provided for fetching bookmarks.');
-                }
+                const bookmarksResponse = await axios.get<Bookmark[]>(`${apiUrl}/favorites/${userId}`);
+                setBookmarkedPostIds(bookmarksResponse.data.map((b) => b.post_id));
             } catch (err) {
                 setError('Failed to fetch data');
                 console.error(err);
@@ -80,34 +60,15 @@ const Collection: React.FC = () => {
         fetchPosts();
     }, [userId]);
 
+    const filteredPosts = useFilteredPosts(
+        posts.filter((post) => bookmarkedPostIds.includes(post.id)),
+        selectedTagIds,
+        'newest'
+    );
+
     const handleTagChange = (selectedTagIds: number[]) => {
         setSelectedTagIds(selectedTagIds);
     };
-
-    const toggleBookmark = async (postId: number) => {
-        try {
-            const isBookmarked = bookmarkedPostIds.includes(postId);
-
-            if (isBookmarked) {
-                await axios.delete(`${apiUrl}/favorites/${userId}/${postId}`);
-                setBookmarkedPostIds(prev => prev.filter(id => id !== postId));
-            } else {
-                const response = await axios.post(`${apiUrl}/favorites/${userId}`, {
-                    post_id: postId,
-                });
-                if (response.status === 201) {
-                    setBookmarkedPostIds(prev => [...prev, postId]);
-                }
-            }
-        } catch (err) {
-            console.error('Failed to toggle bookmark', err);
-        }
-    };
-
-    const filteredPosts = posts.filter(post => bookmarkedPostIds.includes(post.id))
-        .filter(post =>
-            selectedTagIds.length === 0 || post.tags.some(tagRel => selectedTagIds.includes(tagRel.tag.id))
-        );
 
     if (loading) {
         return (
@@ -116,8 +77,6 @@ const Collection: React.FC = () => {
             </div>
         );
     }
-
-
 
     if (error || tagsError) {
         return <div>{error || tagsError}</div>;
@@ -130,44 +89,20 @@ const Collection: React.FC = () => {
                     <TagSelector tags={tags} onChange={handleTagChange} />
                 </div>
             </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 mt-10">
-                {filteredPosts.map(post => (
-                    <div key={post.id} className="max-w-sm mx-auto bg-white rounded-lg shadow-lg overflow-hidden">
-                        <iframe
-                            src={getYouTubeEmbedUrl(post.video_url)}
-                            title={post.title}
-                            className="w-full h-56"
-                            allowFullScreen
-                        />
-                        <div className="p-4">
-                            <h2 className="text-xl font-semibold mb-1">{post.title}</h2>
-                            <p className="text-sm text-gray-600">{post.instructor.name}</p>
-                            <p className="mt-1 text-gray-700">{post.description}</p>
-                            <div className="mt-2 flex flex-wrap gap-2">
-                                {post.tags.map(tagRel => (
-                                    <span
-                                        key={tagRel.tag.id}
-                                        className="text-xs px-2 py-1 bg-blue-100 text-blue-800 rounded-full"
-                                    >
-                                        {tagRel.tag.name}
-                                    </span>
-                                ))}
-                            </div>
-                            <div className="mt-4 flex justify-end">
-                                <FontAwesomeIcon
-                                    icon={bookmarkedPostIds.includes(post.id) ? solidBookmark : regularBookmark}
-                                    size="lg"
-                                    className="cursor-pointer text-blue-600"
-                                    onClick={() => toggleBookmark(post.id)}
-                                />
-                            </div>
-                        </div>
-                    </div>
-                ))}
-            </div>
+            <PostGrid
+                posts={filteredPosts}
+                userId={userId ? parseInt(userId, 10) : null}
+                bookmarkedPostIds={bookmarkedPostIds}
+                toggleBookmark={(postId) =>
+                    toggleBookmark(postId, userId ? parseInt(userId, 10) : null, bookmarkedPostIds, setBookmarkedPostIds, apiUrl)
+                }
+                setSelectedDescription={setSelectedDescription}
+                selectedDescription={selectedDescription}
+                getYouTubeEmbedUrl={getYouTubeEmbedUrl}
+            />
         </div>
     );
 };
 
 export default Collection;
+

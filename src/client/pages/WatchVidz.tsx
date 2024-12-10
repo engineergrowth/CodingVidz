@@ -1,26 +1,20 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { CircularProgress, MenuItem, Select, SelectChangeEvent } from '@mui/material';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faBookmark as solidBookmark } from '@fortawesome/free-solid-svg-icons';
-import { faBookmark as regularBookmark } from '@fortawesome/free-regular-svg-icons';
 import { useUser } from '../context/userContext';
 import useFetchTags from '../hooks/useFetchTags';
+import useFilteredPosts from '../hooks/useFilteredPosts';
+import { toggleBookmark } from '../utils/bookmarkUtils';
 import TagSelector from '../components/TagSelector';
-import DescriptionModal from '../components/modals/DescriptionModal';
-import Tooltip from '@mui/material/Tooltip';
+import PostGrid from '../components/PostGrid';
 import { getYouTubeEmbedUrl } from '../utils/videoUtils';
-
-interface Instructor {
-    name: string;
-}
 
 interface Post {
     id: number;
     title: string;
     description: string;
     video_url: string;
-    instructor: Instructor;
+    instructor: { name: string };
     likes: number;
     created_at: string;
     tags: { tag: { id: number; name: string } }[];
@@ -39,12 +33,10 @@ const WatchVidz: React.FC = () => {
     const [error, setError] = useState<string | null>(null);
     const [selectedTagIds, setSelectedTagIds] = useState<number[]>([]);
     const [sortOption, setSortOption] = useState<string>('newest');
-    const {userId} = useUser();
-    const {tags, error: tagsError} = useFetchTags();
-    const apiUrl = import.meta.env.VITE_API_URL;
-
     const [selectedDescription, setSelectedDescription] = useState<string | null>(null);
-
+    const { userId } = useUser();
+    const { tags, error: tagsError } = useFetchTags();
+    const apiUrl = import.meta.env.VITE_API_URL;
 
     useEffect(() => {
         const fetchPosts = async () => {
@@ -55,11 +47,9 @@ const WatchVidz: React.FC = () => {
                 if (userId) {
                     const bookmarksResponse = await axios.get<Bookmark[]>(`${apiUrl}/favorites/${userId}`);
                     setBookmarkedPostIds(bookmarksResponse.data.map((b) => b.post_id));
-                } else {
-                    console.warn('No userId provided for fetching bookmarks.');
                 }
             } catch (err) {
-                setError('Failed to fetch data');
+                setError('Failed to fetch posts');
                 console.error(err);
             } finally {
                 setLoading(false);
@@ -69,6 +59,8 @@ const WatchVidz: React.FC = () => {
         fetchPosts();
     }, [userId]);
 
+    const filteredPosts = useFilteredPosts(posts, selectedTagIds, sortOption);
+
     const handleTagChange = (selectedTagIds: number[]) => {
         setSelectedTagIds(selectedTagIds);
     };
@@ -77,45 +69,10 @@ const WatchVidz: React.FC = () => {
         setSortOption(event.target.value as string);
     };
 
-    const toggleBookmark = async (postId: number) => {
-        try {
-            const isBookmarked = bookmarkedPostIds.includes(postId);
-
-            if (isBookmarked) {
-                await axios.delete(`${apiUrl}/favorites/${userId}/${postId}`);
-                setBookmarkedPostIds((prev) => prev.filter((id) => id !== postId));
-            } else {
-                const response = await axios.post(`${apiUrl}/favorites/${userId}`, {
-                    post_id: postId,
-                });
-                if (response.status === 201) {
-                    setBookmarkedPostIds((prev) => [...prev, postId]);
-                }
-            }
-        } catch (err) {
-            console.error('Failed to toggle bookmark', err);
-        }
-    };
-
-    const filteredPosts = posts
-        .filter((post) =>
-            selectedTagIds.length === 0 || post.tags.some((tagRel) => selectedTagIds.includes(tagRel.tag.id))
-        )
-        .sort((a, b) => {
-            if (sortOption === 'newest') {
-                return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-            } else if (sortOption === 'oldest') {
-                return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
-            } else if (sortOption === 'popular') {
-                return b.likes - a.likes;
-            }
-            return 0;
-        });
-
     if (loading) {
         return (
             <div className="flex justify-center items-center h-screen">
-                <CircularProgress/>
+                <CircularProgress />
             </div>
         );
     }
@@ -146,84 +103,19 @@ const WatchVidz: React.FC = () => {
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 mt-10">
-                {filteredPosts.map((post) => (
-                    <div
-                        key={post.id}
-                        className="bg-white rounded-lg shadow-lg overflow-hidden flex flex-col h-[420px]"
-                    >
-
-                        <iframe
-                            src={getYouTubeEmbedUrl(post.video_url)}
-                            title={post.title}
-                            className="w-full h-[60%]"
-                            allowFullScreen
-                        />
-                        <div className="flex flex-col justify-between flex-grow p-4">
-                            <div>
-                                <h2
-                                    className="truncate text-xl font-semibold mb-1"
-                                    title={post.title}
-                                >
-                                    {post.title}
-                                </h2>
-
-                                <p className="text-sm text-gray-600">{post.instructor.name}</p>
-                            </div>
-                            <div className="mt-2">
-                                {/* Tooltip for larger screens */}
-                                <div className="hidden md:block">
-                                    <Tooltip title={post.description || "No description available"} arrow>
-                                    <span className="text-blue-500 text-sm cursor-pointer">
-                                        Description
-                                    </span>
-                                    </Tooltip>
-                                </div>
-                                {/* Button for smaller screens */}
-                                <div className="block md:hidden">
-                                    <button
-                                        className="text-blue-500 text-sm hover:text-blue-700 transition"
-                                        onClick={() => setSelectedDescription(post.description)}
-                                    >
-                                        View Description
-                                    </button>
-                                </div>
-                            </div>
-                            <div className="flex justify-between items-center mt-auto">
-                                <div className="flex flex-wrap gap-2">
-                                    {post.tags.map((tagRel) => (
-                                        <span
-                                            key={tagRel.tag.id}
-                                            className="text-xs px-2 py-1 bg-blue-100 text-blue-800 rounded-full"
-                                        >
-                                        {tagRel.tag.name}
-                                    </span>
-                                    ))}
-                                </div>
-                                {userId && (
-                                    <FontAwesomeIcon
-                                        icon={bookmarkedPostIds.includes(post.id) ? solidBookmark : regularBookmark}
-                                        size="lg"
-                                        className="cursor-pointer text-blue-600"
-                                        onClick={() => toggleBookmark(post.id)}
-                                    />
-                                )}
-                            </div>
-                        </div>
-                    </div>
-                ))}
-            </div>
-
-            {selectedDescription && (
-                <DescriptionModal
-                    description={selectedDescription}
-                    onClose={() => setSelectedDescription(null)}
-                />
-            )}
+            <PostGrid
+                posts={filteredPosts}
+                userId={userId ? parseInt(userId, 10) : null}
+                bookmarkedPostIds={bookmarkedPostIds}
+                toggleBookmark={(postId) =>
+                    toggleBookmark(postId, userId ? parseInt(userId, 10) : null, bookmarkedPostIds, setBookmarkedPostIds, apiUrl)
+                }
+                setSelectedDescription={setSelectedDescription}
+                selectedDescription={selectedDescription}
+                getYouTubeEmbedUrl={getYouTubeEmbedUrl}
+            />
         </div>
     );
-
-
-}
+};
 
 export default WatchVidz;
