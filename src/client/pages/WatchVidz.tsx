@@ -8,6 +8,8 @@ import { useUser } from '../context/userContext';
 import useFetchTags from '../hooks/useFetchTags';
 import TagSelector from '../components/TagSelector';
 import DescriptionModal from '../components/modals/DescriptionModal';
+import Tooltip from '@mui/material/Tooltip';
+import { getYouTubeEmbedUrl } from '../utils/videoUtils';
 
 interface Instructor {
     name: string;
@@ -37,21 +39,12 @@ const WatchVidz: React.FC = () => {
     const [error, setError] = useState<string | null>(null);
     const [selectedTagIds, setSelectedTagIds] = useState<number[]>([]);
     const [sortOption, setSortOption] = useState<string>('newest');
-    const { userId } = useUser();
-    const { tags, error: tagsError } = useFetchTags();
+    const {userId} = useUser();
+    const {tags, error: tagsError} = useFetchTags();
     const apiUrl = import.meta.env.VITE_API_URL;
 
     const [selectedDescription, setSelectedDescription] = useState<string | null>(null);
 
-    // Extracts the video ID from a YouTube URL to construct an embed URL
-    const getYouTubeEmbedUrl = (url: string) => {
-        const youtubeRegex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/]+\/.*|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
-        const match = url.match(youtubeRegex);
-        if (match && match[1]) {
-            return `https://www.youtube.com/embed/${match[1]}`;
-        }
-        return url;
-    };
 
     useEffect(() => {
         const fetchPosts = async () => {
@@ -122,7 +115,7 @@ const WatchVidz: React.FC = () => {
     if (loading) {
         return (
             <div className="flex justify-center items-center h-screen">
-                <CircularProgress />
+                <CircularProgress/>
             </div>
         );
     }
@@ -157,43 +150,65 @@ const WatchVidz: React.FC = () => {
                 {filteredPosts.map((post) => (
                     <div
                         key={post.id}
-                        className="max-w-sm mx-auto bg-white rounded-lg shadow-lg overflow-hidden flex flex-col"
+                        className="bg-white rounded-lg shadow-lg overflow-hidden flex flex-col h-[420px]"
                     >
+
                         <iframe
                             src={getYouTubeEmbedUrl(post.video_url)}
                             title={post.title}
-                            className="w-full h-56"
+                            className="w-full h-[60%]"
                             allowFullScreen
                         />
-                        <div className="p-4 flex-grow">
-                            <h2 className="text-xl font-semibold mb-1">{post.title}</h2>
-                            <p className="text-sm text-gray-600">{post.instructor.name}</p>
-                            <button
-                                className="text-blue-500 underline mt-2"
-                                onClick={() => setSelectedDescription(post.description)}
-                            >
-                                View Description
-                            </button>
-                        </div>
-                        <div className="p-4 flex justify-between items-center mt-auto">
-                            <div className="flex flex-wrap gap-2">
-                                {post.tags.map((tagRel) => (
-                                    <span
-                                        key={tagRel.tag.id}
-                                        className="text-xs px-2 py-1 bg-blue-100 text-blue-800 rounded-full"
+                        <div className="flex flex-col justify-between flex-grow p-4">
+                            <div>
+                                <h2
+                                    className="truncate text-xl font-semibold mb-1"
+                                    title={post.title}
+                                >
+                                    {post.title}
+                                </h2>
+
+                                <p className="text-sm text-gray-600">{post.instructor.name}</p>
+                            </div>
+                            <div className="mt-2">
+                                {/* Tooltip for larger screens */}
+                                <div className="hidden md:block">
+                                    <Tooltip title={post.description || "No description available"} arrow>
+                                    <span className="text-blue-500 text-sm cursor-pointer">
+                                        Description
+                                    </span>
+                                    </Tooltip>
+                                </div>
+                                {/* Button for smaller screens */}
+                                <div className="block md:hidden">
+                                    <button
+                                        className="text-blue-500 text-sm hover:text-blue-700 transition"
+                                        onClick={() => setSelectedDescription(post.description)}
                                     >
+                                        View Description
+                                    </button>
+                                </div>
+                            </div>
+                            <div className="flex justify-between items-center mt-auto">
+                                <div className="flex flex-wrap gap-2">
+                                    {post.tags.map((tagRel) => (
+                                        <span
+                                            key={tagRel.tag.id}
+                                            className="text-xs px-2 py-1 bg-blue-100 text-blue-800 rounded-full"
+                                        >
                                         {tagRel.tag.name}
                                     </span>
-                                ))}
+                                    ))}
+                                </div>
+                                {userId && (
+                                    <FontAwesomeIcon
+                                        icon={bookmarkedPostIds.includes(post.id) ? solidBookmark : regularBookmark}
+                                        size="lg"
+                                        className="cursor-pointer text-blue-600"
+                                        onClick={() => toggleBookmark(post.id)}
+                                    />
+                                )}
                             </div>
-                            {userId && (
-                                <FontAwesomeIcon
-                                    icon={bookmarkedPostIds.includes(post.id) ? solidBookmark : regularBookmark}
-                                    size="lg"
-                                    className="cursor-pointer text-blue-600"
-                                    onClick={() => toggleBookmark(post.id)}
-                                />
-                            )}
                         </div>
                     </div>
                 ))}
@@ -207,6 +222,8 @@ const WatchVidz: React.FC = () => {
             )}
         </div>
     );
-};
+
+
+}
 
 export default WatchVidz;
