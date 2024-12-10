@@ -108,7 +108,7 @@ const PostForm: React.FC = () => {
 
             <div>
                 <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
-                    Description (max 40 characters)
+                    Description (max 80 characters)
                 </label>
                 <TextField
                     id="description"
@@ -118,15 +118,16 @@ const PostForm: React.FC = () => {
                     multiline
                     rows={4}
                     value={description}
-                    onChange={e => {
-                        const value = e.target.value;
-                        // Remove newlines and trim spaces
-                        const sanitizedValue = value.replace(/\s+/g, ' ');
-                        // Trim to 40 characters
-                        setDescription(sanitizedValue.slice(0, 40));
+                    onChange={(e) => {
+                        // Limit input to 80 characters
+                        setDescription(e.target.value.slice(0, 80));
                     }}
-                    helperText={`${description.length}/40 characters`}
+                    helperText={`${description.length}/80 characters`}
                 />
+
+
+
+
 
             </div>
 

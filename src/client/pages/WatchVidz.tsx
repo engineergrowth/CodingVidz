@@ -7,6 +7,7 @@ import { faBookmark as regularBookmark } from '@fortawesome/free-regular-svg-ico
 import { useUser } from '../context/userContext';
 import useFetchTags from '../hooks/useFetchTags';
 import TagSelector from '../components/TagSelector';
+import DescriptionModal from '../components/modals/DescriptionModal';
 
 interface Instructor {
     name: string;
@@ -40,9 +41,9 @@ const WatchVidz: React.FC = () => {
     const { tags, error: tagsError } = useFetchTags();
     const apiUrl = import.meta.env.VITE_API_URL;
 
+    const [selectedDescription, setSelectedDescription] = useState<string | null>(null);
 
     // Extracts the video ID from a YouTube URL to construct an embed URL
-
     const getYouTubeEmbedUrl = (url: string) => {
         const youtubeRegex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/]+\/.*|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
         const match = url.match(youtubeRegex);
@@ -75,8 +76,6 @@ const WatchVidz: React.FC = () => {
         fetchPosts();
     }, [userId]);
 
-
-
     const handleTagChange = (selectedTagIds: number[]) => {
         setSelectedTagIds(selectedTagIds);
     };
@@ -85,21 +84,19 @@ const WatchVidz: React.FC = () => {
         setSortOption(event.target.value as string);
     };
 
-    // Check if the post is bookmarked by the user and toggle bookmark state
-
     const toggleBookmark = async (postId: number) => {
         try {
             const isBookmarked = bookmarkedPostIds.includes(postId);
 
             if (isBookmarked) {
                 await axios.delete(`${apiUrl}/favorites/${userId}/${postId}`);
-                setBookmarkedPostIds(prev => prev.filter(id => id !== postId));
+                setBookmarkedPostIds((prev) => prev.filter((id) => id !== postId));
             } else {
                 const response = await axios.post(`${apiUrl}/favorites/${userId}`, {
                     post_id: postId,
                 });
                 if (response.status === 201) {
-                    setBookmarkedPostIds(prev => [...prev, postId]);
+                    setBookmarkedPostIds((prev) => [...prev, postId]);
                 }
             }
         } catch (err) {
@@ -107,21 +104,20 @@ const WatchVidz: React.FC = () => {
         }
     };
 
-
-    let filteredPosts = posts.filter(post =>
-        selectedTagIds.length === 0 || post.tags.some(tagRel => selectedTagIds.includes(tagRel.tag.id))
-    );
-
-    filteredPosts = filteredPosts.sort((a, b) => {
-        if (sortOption === 'newest') {
-            return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-        } else if (sortOption === 'oldest') {
-            return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
-        } else if (sortOption === 'popular') {
-            return b.likes - a.likes;
-        }
-        return 0;
-    });
+    const filteredPosts = posts
+        .filter((post) =>
+            selectedTagIds.length === 0 || post.tags.some((tagRel) => selectedTagIds.includes(tagRel.tag.id))
+        )
+        .sort((a, b) => {
+            if (sortOption === 'newest') {
+                return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+            } else if (sortOption === 'oldest') {
+                return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+            } else if (sortOption === 'popular') {
+                return b.likes - a.likes;
+            }
+            return 0;
+        });
 
     if (loading) {
         return (
@@ -130,7 +126,6 @@ const WatchVidz: React.FC = () => {
             </div>
         );
     }
-
 
     if (error || tagsError) {
         return <div>{error || tagsError}</div>;
@@ -159,9 +154,11 @@ const WatchVidz: React.FC = () => {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 mt-10">
-                {filteredPosts.map(post => (
-                    <div key={post.id}
-                         className="max-w-sm mx-auto bg-white rounded-lg shadow-lg overflow-hidden flex flex-col">
+                {filteredPosts.map((post) => (
+                    <div
+                        key={post.id}
+                        className="max-w-sm mx-auto bg-white rounded-lg shadow-lg overflow-hidden flex flex-col"
+                    >
                         <iframe
                             src={getYouTubeEmbedUrl(post.video_url)}
                             title={post.title}
@@ -171,22 +168,24 @@ const WatchVidz: React.FC = () => {
                         <div className="p-4 flex-grow">
                             <h2 className="text-xl font-semibold mb-1">{post.title}</h2>
                             <p className="text-sm text-gray-600">{post.instructor.name}</p>
-                            <p className="mt-1 text-gray-700">{post.description}</p>
+                            <button
+                                className="text-blue-500 underline mt-2"
+                                onClick={() => setSelectedDescription(post.description)}
+                            >
+                                View Description
+                            </button>
                         </div>
-                        {/* Tags and Bookmark row */}
                         <div className="p-4 flex justify-between items-center mt-auto">
-                            {/* Tags on the bottom-left */}
                             <div className="flex flex-wrap gap-2">
-                                {post.tags.map(tagRel => (
+                                {post.tags.map((tagRel) => (
                                     <span
                                         key={tagRel.tag.id}
                                         className="text-xs px-2 py-1 bg-blue-100 text-blue-800 rounded-full"
                                     >
-                            {tagRel.tag.name}
-                        </span>
+                                        {tagRel.tag.name}
+                                    </span>
                                 ))}
                             </div>
-                            {/* Bookmark on the bottom-right */}
                             {userId && (
                                 <FontAwesomeIcon
                                     icon={bookmarkedPostIds.includes(post.id) ? solidBookmark : regularBookmark}
@@ -200,6 +199,12 @@ const WatchVidz: React.FC = () => {
                 ))}
             </div>
 
+            {selectedDescription && (
+                <DescriptionModal
+                    description={selectedDescription}
+                    onClose={() => setSelectedDescription(null)}
+                />
+            )}
         </div>
     );
 };
