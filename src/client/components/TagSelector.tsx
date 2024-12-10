@@ -16,12 +16,16 @@ const TagSelector: React.FC<TagSelectorProps> = ({ tags, onChange }) => {
     const [selectedTags, setSelectedTags] = useState<Tag[]>([]);
 
     const handleChange = (event: any, newValue: Tag[]) => {
-        setSelectedTags(newValue);
-        onChange(newValue.map(tag => tag.id));
+        // Limit to 3 tags
+        if (newValue.length <= 3) {
+            setSelectedTags(newValue);
+            onChange(newValue.map(tag => tag.id));
+        } else {
+            alert("You can select up to 3 tags only.");
+        }
     };
 
     const safeTags = Array.isArray(tags) ? tags : [];
-
 
     return (
         <Autocomplete
