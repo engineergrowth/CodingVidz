@@ -15,7 +15,7 @@ model User {
   role      String     @default("user")
   posts     Post[]
   comments  Comment[]
-  reactions Reaction[]
+  votes     Vote[]
   bookmarks Bookmark[]
 }
 
@@ -29,9 +29,9 @@ model Post {
   user_id       Int
   user          User        @relation(fields: [user_id], references: [id])
   instructor_id Int
-  instructor    Instructor  @relation(fields: [instructor_id], references: [id]) // Relation to Instructor
+  instructor    Instructor  @relation(fields: [instructor_id], references: [id])
   comments      Comment[]
-  reactions     Reaction[]
+  votes         Vote[]
   bookmarks     Bookmark[]
   tags          TagOnPost[]
 }
@@ -67,14 +67,18 @@ model Comment {
   user       User     @relation(fields: [user_id], references: [id])
 }
 
-model Reaction {
-  id            Int      @id @default(autoincrement())
-  reaction_type String
-  created_at    DateTime @default(now())
-  post_id       Int
-  post          Post     @relation(fields: [post_id], references: [id])
-  user_id       Int
-  user          User     @relation(fields: [user_id], references: [id])
+model Vote {
+  id         Int      @id @default(autoincrement())
+  value      Int // -1 for downvote, 1 for upvote
+  created_at DateTime @default(now())
+  user_id    Int
+  user       User     @relation(fields: [user_id], references: [id])
+  post_id    Int
+  post       Post     @relation(fields: [post_id], references: [id])
+
+  @@unique([user_id, post_id])
+  @@index([post_id]) // Indexing post_id for faster querying
+  @@index([user_id]) // Indexing user_id for faster querying
 }
 
 model Bookmark {

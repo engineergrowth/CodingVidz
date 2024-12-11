@@ -123,7 +123,7 @@ const PostForm: React.FC = () => {
                     onChange={(e) => {
                         setDescription(e.target.value.slice(0, 200));
                     }}
-                    helperText={`${description.length}/80 characters`}
+                    helperText={`${description.length}/200 characters`}
                 />
 
 
