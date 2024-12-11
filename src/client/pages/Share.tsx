@@ -110,19 +110,18 @@ const PostForm: React.FC = () => {
 
             <div>
                 <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
-                    Description (max 80 characters)
+                    Description (max 200 characters)
                 </label>
                 <TextField
                     id="description"
-                    label="Write a brief description of the video"
+                    label="Add a description (optional)"
                     variant="outlined"
                     fullWidth
                     multiline
                     rows={4}
                     value={description}
                     onChange={(e) => {
-                        // Limit input to 80 characters
-                        setDescription(e.target.value.slice(0, 80));
+                        setDescription(e.target.value.slice(0, 200));
                     }}
                     helperText={`${description.length}/80 characters`}
                 />
