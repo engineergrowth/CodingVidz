@@ -70,6 +70,25 @@ const Collection: React.FC = () => {
         setSelectedTagIds(selectedTagIds);
     };
 
+    const handleUpvote = async (postId: number) => {
+        try {
+            await axios.post(`${apiUrl}/posts/${postId}/upvote`, { userId });
+            // TODO: update the UI or refetch posts
+        } catch (error) {
+            console.error('Failed to upvote post:', error);
+        }
+    };
+
+    const handleDownvote = async (postId: number) => {
+        try {
+            await axios.post(`${apiUrl}/posts/${postId}/downvote`, { userId });
+            // TODO: update the UI or refetch posts
+        } catch (error) {
+            console.error('Failed to downvote post:', error);
+        }
+    };
+
+
     if (loading) {
         return (
             <div className="flex justify-center items-center h-screen">
@@ -99,7 +118,9 @@ const Collection: React.FC = () => {
                 setSelectedDescription={setSelectedDescription}
                 selectedDescription={selectedDescription}
                 getYouTubeEmbedUrl={getYouTubeEmbedUrl}
-            />
+                handleUpvote={handleUpvote}
+                handleDownvote={handleDownvote}
+                            />
         </div>
     );
 };

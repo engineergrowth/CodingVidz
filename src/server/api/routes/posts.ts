@@ -114,13 +114,10 @@ router.put('/:id', async (req, res) => {
     }
 
     try {
-        // Validate user exists
         const userExists = await prisma.user.findUnique({ where: { id: user_id } });
         if (!userExists) {
             return res.status(400).json({ error: 'User does not exist' });
         }
-
-        // Handle instructor logic
         let instructor = null;
         if (instructor_name) {
             const instructorNameUpperCase = instructor_name.toUpperCase();
@@ -134,7 +131,6 @@ router.put('/:id', async (req, res) => {
             }
         }
 
-        // Update post
         const postUpdate = await prisma.post.update({
             where: { id: Number(id) },
             data: {

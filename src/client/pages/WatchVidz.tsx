@@ -69,6 +69,24 @@ const WatchVidz: React.FC = () => {
         setSortOption(event.target.value as string);
     };
 
+    const handleUpvote = async (postId: number) => {
+        try {
+            await axios.post(`${apiUrl}/posts/${postId}/upvote`, { userId });
+            // TODO: Optionally update the UI or refetch posts
+        } catch (error) {
+            console.error('Failed to upvote post:', error);
+        }
+    };
+
+    const handleDownvote = async (postId: number) => {
+        try {
+            await axios.post(`${apiUrl}/posts/${postId}/downvote`, { userId });
+            // TODO: Optionally update the UI or refetch posts
+        } catch (error) {
+            console.error('Failed to downvote post:', error);
+        }
+    };
+
     if (loading) {
         return (
             <div className="flex justify-center items-center h-screen">
@@ -113,6 +131,8 @@ const WatchVidz: React.FC = () => {
                 setSelectedDescription={setSelectedDescription}
                 selectedDescription={selectedDescription}
                 getYouTubeEmbedUrl={getYouTubeEmbedUrl}
+                handleUpvote={handleUpvote}
+                handleDownvote={handleDownvote}
             />
         </div>
     );

@@ -3,6 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBookmark as solidBookmark } from '@fortawesome/free-solid-svg-icons';
 import { faBookmark as regularBookmark } from '@fortawesome/free-regular-svg-icons';
 import DescriptionModal from './modals/DescriptionModal';
+import { faArrowDown, faArrowUp } from '@fortawesome/free-solid-svg-icons';
 
 interface Tag {
     id: number;
@@ -26,6 +27,8 @@ interface PostGridProps {
     setSelectedDescription: (description: string | null) => void;
     selectedDescription: string | null;
     getYouTubeEmbedUrl: (url: string) => string;
+    handleUpvote: (postId: number) => void;
+    handleDownvote: (postId: number) => void;
 }
 
 const PostGrid: React.FC<PostGridProps> = ({
@@ -36,6 +39,8 @@ const PostGrid: React.FC<PostGridProps> = ({
                                                setSelectedDescription,
                                                selectedDescription,
                                                getYouTubeEmbedUrl,
+                                               handleUpvote,
+                                               handleDownvote
                                            }) => {
     return (
         <>
@@ -85,21 +90,35 @@ const PostGrid: React.FC<PostGridProps> = ({
                                     {post.tags.map((tagRel) => (
                                         <span
                                             key={tagRel.tag.id}
-                                            className="text-xs px-2 py-1 bg-blue-100 text-blue-800 rounded-full"
-                                        >
-                                            {tagRel.tag.name}
+                                            className="text-xs px-2 py-1 bg-blue-100 text-blue-800 rounded-full">
+                                             {tagRel.tag.name}
                                         </span>
                                     ))}
                                 </div>
                                 {userId && (
-                                    <FontAwesomeIcon
-                                        icon={bookmarkedPostIds.includes(post.id) ? solidBookmark : regularBookmark}
-                                        size="lg"
-                                        className="cursor-pointer text-blue-600"
-                                        onClick={() => toggleBookmark(post.id)}
-                                    />
+                                    <div className="flex items-center gap-4">
+                                        <FontAwesomeIcon
+                                            icon={faArrowUp}
+                                            size="lg"
+                                            className="cursor-pointer text-blue-600"
+                                            onClick={() => handleUpvote(post.id)}
+                                        />
+                                        <FontAwesomeIcon
+                                            icon={faArrowDown}
+                                            size="lg"
+                                            className="cursor-pointer text-blue-600"
+                                            onClick={() => handleDownvote(post.id)}
+                                        />
+                                        <FontAwesomeIcon
+                                            icon={bookmarkedPostIds.includes(post.id) ? solidBookmark : regularBookmark}
+                                            size="lg"
+                                            className="cursor-pointer text-blue-600"
+                                            onClick={() => toggleBookmark(post.id)}
+                                        />
+                                    </div>
                                 )}
                             </div>
+
                         </div>
                     </div>
                 ))}
