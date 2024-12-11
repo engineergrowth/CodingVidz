@@ -16,14 +16,14 @@ router.post('/', async (req, res) => {
         const vote = await prisma.vote.upsert({
             where: {
                 user_id_post_id: {
-                    user_id: userId,
-                    post_id: postId,
+                    user_id: parseInt(userId, 10),
+                    post_id: parseInt(postId, 10),
                 },
             },
             update: { value }, // Update the vote value if it already exists
             create: {
-                user_id: userId,
-                post_id: postId,
+                user_id: parseInt(userId, 10),
+                post_id: parseInt(postId, 10),
                 value,
             },
         });
@@ -52,7 +52,6 @@ router.get('/post/:postId', async (req, res) => {
     }
 });
 
-
 // Delete a vote
 router.delete('/', async (req, res) => {
     const { postId, userId } = req.body;
@@ -61,8 +60,8 @@ router.delete('/', async (req, res) => {
         await prisma.vote.delete({
             where: {
                 user_id_post_id: {
-                    user_id: userId,
-                    post_id: postId,
+                    user_id: parseInt(userId, 10),
+                    post_id: parseInt(postId, 10),
                 },
             },
         });
@@ -73,6 +72,5 @@ router.delete('/', async (req, res) => {
         res.status(500).json({ error: 'Failed to remove vote.' });
     }
 });
-
 
 export default router;
