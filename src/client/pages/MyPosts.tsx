@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import MyPostCard from '../components/MyPostCard';
 import PostModal from '../components/modals/PostModal';
 import { getYouTubeEmbedUrl } from '../utils/videoUtils';
+import DeleteConfirmationModal from '../components/modals/DeleteConfirmationModal';
 
 
 export interface Post {
@@ -26,9 +27,14 @@ const MyPosts: React.FC = () => {
     const [error, setError] = useState<string | null>(null);
     const [selectedPost, setSelectedPost] = useState<Post | null>(null);
     const [openModal, setOpenModal] = useState<boolean>(false);
-    const { userId } = useUser();
+    const {userId} = useUser();
     const navigate = useNavigate();
     const apiUrl = import.meta.env.VITE_API_URL;
+    const [deleteConfirmation, setDeleteConfirmation] = useState<{
+        isOpen: boolean;
+        postId: number | null;
+    }>({isOpen: false, postId: null});
+
 
     useEffect(() => {
         if (!userId) {
@@ -85,7 +91,7 @@ const MyPosts: React.FC = () => {
             });
             setPosts((prevPosts) =>
                 prevPosts.map((post) =>
-                    post.id === updatedPost.id ? { ...post, ...payload } : post
+                    post.id === updatedPost.id ? {...post, ...payload} : post
                 )
             );
             handleCloseModal();
@@ -96,6 +102,9 @@ const MyPosts: React.FC = () => {
     };
 
 
+    const confirmDelete = (postId: number) => {
+        setDeleteConfirmation({isOpen: true, postId});
+    };
 
     const handleDelete = async (postId: number) => {
         try {
@@ -109,7 +118,7 @@ const MyPosts: React.FC = () => {
     if (loading) {
         return (
             <div className="flex justify-center items-center h-screen">
-                <CircularProgress />
+                <CircularProgress/>
             </div>
         );
     }
@@ -126,7 +135,7 @@ const MyPosts: React.FC = () => {
                         key={post.id}
                         post={post}
                         onEdit={handleEdit}
-                        onDelete={handleDelete}
+                        onDelete={() => confirmDelete(post.id)} // Trigger the confirmation modal
                         getYouTubeEmbedUrl={getYouTubeEmbedUrl}
                     />
                 ))}
@@ -139,8 +148,25 @@ const MyPosts: React.FC = () => {
                     onSave={handleSave}
                 />
             )}
+
+            {/* Delete Confirmation Modal */}
+            <DeleteConfirmationModal
+                isOpen={deleteConfirmation.isOpen}
+                onClose={() => setDeleteConfirmation({isOpen: false, postId: null})}
+                onConfirm={() => {
+                    if (deleteConfirmation.postId !== null) {
+                        handleDelete(deleteConfirmation.postId);
+                        setDeleteConfirmation({isOpen: false, postId: null});
+                    }
+                }}
+                postTitle={
+                    deleteConfirmation.postId
+                        ? posts.find((post) => post.id === deleteConfirmation.postId)?.title || null
+                        : null
+                }
+            />
         </div>
     );
-};
+}
 
-export default MyPosts;
+    export default MyPosts;
