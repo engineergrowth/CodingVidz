@@ -1,11 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { CircularProgress, Button } from '@mui/material';
+import { CircularProgress } from '@mui/material';
 import { useUser } from '../context/userContext';
-import PostModal from '../components/modals/PostModal';
 import { useNavigate } from 'react-router-dom';
+import MyPostCard from '../components/MyPostCard';
+import PostModal from '../components/modals/PostModal';
+import { getYouTubeEmbedUrl } from '../utils/videoUtils';
 
-interface Post {
+
+export interface Post {
     id: number;
     title: string;
     description: string;
@@ -13,6 +16,7 @@ interface Post {
     user_id: number;
     instructor: { name: string };
     tags: { tag: { id: number; name: string } }[];
+    instructor_name?: string;
 }
 
 
@@ -26,29 +30,17 @@ const MyPosts: React.FC = () => {
     const navigate = useNavigate();
     const apiUrl = import.meta.env.VITE_API_URL;
 
-
     useEffect(() => {
         if (!userId) {
             navigate('/login');
         }
-    }, [userId, navigate])
-
-    const userIdAsNumber = userId ? parseInt(userId) : null;
-
-    const getYouTubeEmbedUrl = (url: string) => {
-        const youtubeRegex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/]+\/.*|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
-        const match = url.match(youtubeRegex);
-        if (match && match[1]) {
-            return `https://www.youtube.com/embed/${match[1]}`;
-        }
-        return url;
-    };
+    }, [userId, navigate]);
 
     useEffect(() => {
         const fetchPosts = async () => {
             try {
                 const response = await axios.get<Post[]>(`${apiUrl}/posts`);
-                setPosts(response.data);
+                setPosts(response.data.filter((post) => post.user_id === parseInt(userId || '', 10)));
             } catch (err) {
                 setError('Failed to fetch posts');
                 console.error(err);
@@ -58,16 +50,16 @@ const MyPosts: React.FC = () => {
         };
 
         fetchPosts();
-    }, []);
+    }, [userId]);
 
-    const handleEditClick = (post: Post) => {
-        if (post.id) {
-            setSelectedPost(post);
-            setOpenModal(true);
-        } else {
-            console.error('Post does not have a valid ID');
-        }
+    const handleEdit = (post: Post) => {
+        setSelectedPost({
+            ...post,
+            user_id: userId ? parseInt(userId, 10) : -1 // Use -1 as a fallback
+        });
+        setOpenModal(true);
     };
+
 
     const handleCloseModal = () => {
         setOpenModal(false);
@@ -75,60 +67,44 @@ const MyPosts: React.FC = () => {
     };
 
     const handleSave = async (updatedPost: Post) => {
+
+        const payload = {
+            title: updatedPost.title,
+            video_url: updatedPost.video_url,
+            description: updatedPost.description,
+            instructor_name: updatedPost.instructor_name || updatedPost.instructor?.name,
+            user_id: updatedPost.user_id,
+        };
+
+
         try {
-            if (selectedPost && selectedPost.id) {
-                const postId = selectedPost.id;
-
-                if (userIdAsNumber === null) {
-                    setError('User is not logged in');
-                    return;
-                }
-
-                const { user_id, tags, ...postData } = updatedPost;
-
-                const finalPostData = { ...postData, user_id: userIdAsNumber };
-
-                const response = await axios.put(
-                    `${apiUrl}/posts/${postId}`,
-                    finalPostData
-                );
-
-                setPosts((prevPosts) => {
-                    return prevPosts.map((post) =>
-                        post.id === postId ? { ...post, ...finalPostData } : post
-                    );
-                });
-
-                setOpenModal(false);
-            } else {
-                setError('Selected post is required to update');
-            }
+            await axios.put(`${apiUrl}/posts/${updatedPost.id}`, payload, {
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+            setPosts((prevPosts) =>
+                prevPosts.map((post) =>
+                    post.id === updatedPost.id ? { ...post, ...payload } : post
+                )
+            );
+            handleCloseModal();
         } catch (err) {
+            console.error("Save error:", err);
             setError('Failed to save post');
         }
     };
 
-    const handleDelete = async (postId: number) => {
-        if (!userId) {
-            console.error('User ID is null or undefined');
-            return;
-        }
 
-        const deleteUrl = `${apiUrl}/posts/${postId}?user_id=${userId}`;
+
+    const handleDelete = async (postId: number) => {
         try {
-            await axios.delete(deleteUrl);
-            setPosts(posts.filter((post) => post.id !== postId));
+            await axios.delete(`${apiUrl}/posts/${postId}`);
+            setPosts((prevPosts) => prevPosts.filter((post) => post.id !== postId));
         } catch (err) {
-            console.error('Error deleting post:', err);
             setError('Failed to delete post');
         }
     };
-
-
-
-
-
-    const userPosts = posts.filter(post => post.user_id === userIdAsNumber);
 
     if (loading) {
         return (
@@ -145,48 +121,14 @@ const MyPosts: React.FC = () => {
     return (
         <div className="container mx-auto p-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-10 mt-10">
-
-                {userPosts.map(post => (
-                    <div key={post.id}
-                         className="max-w-sm mx-auto bg-white rounded-lg shadow-lg overflow-hidden flex flex-col">
-                        <iframe
-                            src={getYouTubeEmbedUrl(post.video_url)}
-                            title={post.title}
-                            className="w-full h-56"
-                            allowFullScreen
-                        />
-                        <div className="p-4 flex-grow">
-                            <h2 className="text-xl font-semibold mb-1">{post.title}</h2>
-                            <p className="text-sm text-gray-600">{post.instructor.name}</p>
-                            <p className="mt-1 text-gray-700">{post.description || "No description provided."}</p>
-                            <div className="mt-2 flex flex-wrap gap-2">
-                                {post.tags.map(tagRel => (
-                                    <span
-                                        key={tagRel.tag.id}
-                                        className="text-xs px-2 py-1 bg-blue-100 text-blue-800 rounded-full"
-                                    >
-                                        {tagRel.tag.name}
-                                    </span>
-                                ))}
-                            </div>
-                        </div>
-                        <div className="p-4 mt-auto flex justify-between gap-4">
-                            <Button
-                                variant="contained"
-                                color="primary"
-                                onClick={() => handleEditClick(post)}
-                            >
-                                Edit
-                            </Button>
-                            <Button
-                                variant="contained"
-                                color="secondary"
-                                onClick={() => handleDelete(post.id)}
-                            >
-                                Delete
-                            </Button>
-                        </div>
-                    </div>
+                {posts.map((post) => (
+                    <MyPostCard
+                        key={post.id}
+                        post={post}
+                        onEdit={handleEdit}
+                        onDelete={handleDelete}
+                        getYouTubeEmbedUrl={getYouTubeEmbedUrl}
+                    />
                 ))}
             </div>
 

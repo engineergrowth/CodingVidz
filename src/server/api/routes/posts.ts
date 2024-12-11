@@ -107,26 +107,34 @@ router.put('/:id', async (req, res) => {
     const { id } = req.params;
     const { title, video_url, description, instructor_name, user_id } = req.body;
 
+    console.log('PUT /posts/:id - Request Body:', req.body);
+
     if (!user_id) {
         return res.status(400).json({ error: 'User ID is required' });
     }
 
-    const instructorNameUpperCase = instructor_name ? instructor_name.toUpperCase() : null;
-
-    let instructor = null;
-    if (instructorNameUpperCase) {
-        instructor = await prisma.instructor.findUnique({
-            where: { name: instructorNameUpperCase },
-        });
-
-        if (!instructor) {
-            instructor = await prisma.instructor.create({
-                data: { name: instructorNameUpperCase },
-            });
-        }
-    }
-
     try {
+        // Validate user exists
+        const userExists = await prisma.user.findUnique({ where: { id: user_id } });
+        if (!userExists) {
+            return res.status(400).json({ error: 'User does not exist' });
+        }
+
+        // Handle instructor logic
+        let instructor = null;
+        if (instructor_name) {
+            const instructorNameUpperCase = instructor_name.toUpperCase();
+            instructor = await prisma.instructor.findUnique({
+                where: { name: instructorNameUpperCase },
+            });
+            if (!instructor) {
+                instructor = await prisma.instructor.create({
+                    data: { name: instructorNameUpperCase },
+                });
+            }
+        }
+
+        // Update post
         const postUpdate = await prisma.post.update({
             where: { id: Number(id) },
             data: {
@@ -140,10 +148,11 @@ router.put('/:id', async (req, res) => {
 
         res.status(200).json(postUpdate);
     } catch (error) {
-        console.error(error);
+        console.error('Error updating post:', error);
         res.status(500).json({ error: 'Failed to update post' });
     }
 });
+
 
 
 router.delete('/:id', async (req, res) => {

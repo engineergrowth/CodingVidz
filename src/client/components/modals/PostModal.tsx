@@ -9,13 +9,14 @@ interface PostModalProps {
         description: string;
         video_url: string;
         instructor: { name: string };
+        user_id: number;
     };
     onClose: () => void;
     onSave: (post: any) => void;
 }
 
+
 const PostModal: React.FC<PostModalProps> = ({ post, onClose, onSave }) => {
-    console.log('Selected post in modal:', post);
     const { userId } = useUser();
 
     const [title, setTitle] = useState('');
@@ -27,16 +28,18 @@ const PostModal: React.FC<PostModalProps> = ({ post, onClose, onSave }) => {
         e.preventDefault();
 
         const newPost = {
+            id: post?.id,
             title,
             video_url: videoUrl,
             description,
             instructor_name: instructorName,
-            userId,
+            user_id: post?.user_id || userId,
         };
 
         onSave(newPost);
         onClose();
     };
+
 
     useEffect(() => {
         if (post) {
