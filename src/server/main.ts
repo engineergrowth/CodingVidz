@@ -5,6 +5,7 @@ import postsRouter from "./api/routes/posts.js";
 import authRouter from "./api/routes/auth.js";
 import tagsRouter from "./api/routes/tags.js";
 import favoritesRouter from "./api/routes/favorites.js";
+import voteRouter   from "./api/routes/votes.js";
 import cors from "cors";
 
 const __filename = new URL(import.meta.url).pathname;
@@ -39,6 +40,7 @@ app.use("/posts", postsRouter);
 app.use("/auth", authRouter);
 app.use("/tags", tagsRouter);
 app.use("/favorites", favoritesRouter);
+app.use("/vote", voteRouter);
 
 app.get("*", (req, res) => {
     res.sendFile(path.resolve(__dirname, "../../../client/index.html"));

@@ -69,11 +69,14 @@ const Collection: React.FC = () => {
     const handleTagChange = (selectedTagIds: number[]) => {
         setSelectedTagIds(selectedTagIds);
     };
-
     const handleUpvote = async (postId: number) => {
         try {
-            await axios.post(`${apiUrl}/posts/${postId}/upvote`, { userId });
-            // TODO: update the UI or refetch posts
+            await axios.post(`${apiUrl}/vote`, {
+                postId,
+                userId,
+                value: 1, // Upvote
+            });
+            // TODO: Update the UI or refetch posts to reflect the new vote
         } catch (error) {
             console.error('Failed to upvote post:', error);
         }
@@ -81,12 +84,17 @@ const Collection: React.FC = () => {
 
     const handleDownvote = async (postId: number) => {
         try {
-            await axios.post(`${apiUrl}/posts/${postId}/downvote`, { userId });
-            // TODO: update the UI or refetch posts
+            await axios.post(`${apiUrl}/vote`, {
+                postId,
+                userId,
+                value: -1, // Downvote
+            });
+            // TODO: Update the UI or refetch posts to reflect the new vote
         } catch (error) {
             console.error('Failed to downvote post:', error);
         }
     };
+
 
 
     if (loading) {
