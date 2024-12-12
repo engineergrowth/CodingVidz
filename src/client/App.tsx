@@ -26,7 +26,7 @@ const AppContent = () => {
                     <Route path="/register" element={<Register />} />
                     <Route path="/share" element={<Share />} />
                     <Route path="/collection" element={<Collection />} />
-                    <Route path="/watch-vidz" element={<Watch />} />
+                    <Route path="/watch" element={<Watch />} />
                     <Route path="/my-posts" element={<MyPosts />} />
                     <Route path="/" element={<Watch />} />
                 </Routes>
