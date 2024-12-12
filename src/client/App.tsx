@@ -6,7 +6,7 @@ import Share from './pages/Share';
 import { UserProvider, useUser } from './context/userContext';
 import Collection from './pages/Collection';
 import Navbar from './components/Navbar';
-import WatchVidz from './pages/WatchVidz';
+import Watch from './pages/Watch';
 import MyPosts from './pages/MyPosts';
 import LoginBanner from './components/LoginBanner';
 
@@ -26,9 +26,9 @@ const AppContent = () => {
                     <Route path="/register" element={<Register />} />
                     <Route path="/share" element={<Share />} />
                     <Route path="/collection" element={<Collection />} />
-                    <Route path="/watch-vidz" element={<WatchVidz />} />
+                    <Route path="/watch-vidz" element={<Watch />} />
                     <Route path="/my-posts" element={<MyPosts />} />
-                    <Route path="/" element={<WatchVidz />} />
+                    <Route path="/" element={<Watch />} />
                 </Routes>
             </div>
         </>

@@ -34,6 +34,7 @@ const Collection: React.FC = () => {
     const [error, setError] = useState<string | null>(null);
     const [selectedTagIds, setSelectedTagIds] = useState<number[]>([]);
     const [selectedDescription, setSelectedDescription] = useState<string | null>(null);
+    const [userVotes, setUserVotes] = useState<{ [key: number]: number }>({});
 
     const { userId } = useUser();
     const { tags, error: tagsError } = useFetchTags();
@@ -69,29 +70,34 @@ const Collection: React.FC = () => {
     const handleTagChange = (selectedTagIds: number[]) => {
         setSelectedTagIds(selectedTagIds);
     };
+
     const handleUpvote = async (postId: number) => {
         try {
+            const newVoteValue = userVotes[postId] === 1 ? 0 : 1; // Toggle between 1 and 0
             await axios.post(`${apiUrl}/vote`, {
                 postId,
                 userId,
-                value: 1, // Upvote
+                value: newVoteValue, // Send 1 to upvote or 0 to remove the vote
             });
-            // TODO: Update the UI or refetch posts to reflect the new vote
+            // Update the UI state
+            setUserVotes((prev) => ({ ...prev, [postId]: newVoteValue }));
         } catch (error) {
-            console.error('Failed to upvote post:', error);
+            console.error('Failed to handle upvote:', error);
         }
     };
 
     const handleDownvote = async (postId: number) => {
         try {
+            const newVoteValue = userVotes[postId] === -1 ? 0 : -1; // Toggle between -1 and 0
             await axios.post(`${apiUrl}/vote`, {
                 postId,
                 userId,
-                value: -1, // Downvote
+                value: newVoteValue, // Send -1 to downvote or 0 to remove the vote
             });
-            // TODO: Update the UI or refetch posts to reflect the new vote
+            // Update the UI state
+            setUserVotes((prev) => ({ ...prev, [postId]: newVoteValue }));
         } catch (error) {
-            console.error('Failed to downvote post:', error);
+            console.error('Failed to handle downvote:', error);
         }
     };
 

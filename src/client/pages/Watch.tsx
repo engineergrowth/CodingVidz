@@ -26,7 +26,7 @@ interface Bookmark {
     post_id: number;
 }
 
-const WatchVidz: React.FC = () => {
+const Watch: React.FC = () => {
     const [posts, setPosts] = useState<Post[]>([]);
     const [bookmarkedPostIds, setBookmarkedPostIds] = useState<number[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
@@ -138,4 +138,4 @@ const WatchVidz: React.FC = () => {
     );
 };
 
-export default WatchVidz;
+export default Watch;
