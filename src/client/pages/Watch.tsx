@@ -100,7 +100,7 @@ const Watch: React.FC = () => {
     }
 
     return (
-        <div className="container mx-auto bg-gray-100">
+        <div className="container mx-auto bg-gray-100 mb-20">
             <div className="mb-4 flex flex-col sm:flex-row items-center justify-center sm:space-x-4">
                 <div className="w-full sm:w-64 mb-4 sm:mb-0">
                     <TagSelector tags={tags} onChange={handleTagChange} />

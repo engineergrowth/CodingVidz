@@ -72,9 +72,12 @@ const PostForm: React.FC = () => {
 
 
     return (
-        <form onSubmit={handleSubmit} className="max-w-xl mx-auto p-6 space-y-6 bg-white shadow-md rounded-md">
+        <form
+            onSubmit={handleSubmit}
+            className="max-w-xl mx-auto p-6 space-y-6 bg-white shadow-lg rounded-md border border-gray-200">
+
             <div className="text-center">
-                <h2 className="text-2xl font-semibold mb-2">Share Content</h2>
+                <h2 className="text-gray-700 text-2xl font-semibold mb-2">Share Content</h2>
                 <p className="text-gray-600">Thank you for contributing to our community!</p>
             </div>
 

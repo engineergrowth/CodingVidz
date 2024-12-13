@@ -35,6 +35,24 @@ router.post('/', async (req, res) => {
     }
 });
 
+
+// Get all votes for a user
+router.get('/:userId', async (req, res) => {
+    const { userId } = req.params;
+
+    try {
+        const votes = await prisma.vote.findMany({
+            where: { user_id: parseInt(userId, 10) },
+            select: { post_id: true, value: true },
+        });
+
+        res.status(200).json(votes.map((vote) => ({ postId: vote.post_id, value: vote.value })));
+    } catch (err) {
+        console.error('Error fetching user votes:', err);
+        res.status(500).json({ error: 'Failed to fetch user votes.' });
+    }
+});
+
 // Get total votes for a post
 router.get('/post/:postId', async (req, res) => {
     const { postId } = req.params;

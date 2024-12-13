@@ -43,22 +43,40 @@ const Collection: React.FC = () => {
     useEffect(() => {
         if (!userId) return;
 
-        const fetchPosts = async () => {
+        const fetchPostsAndVotes = async () => {
             try {
-                const response = await axios.get<Post[]>(`${apiUrl}/posts`);
-                setPosts(response.data);
+                // Fetch posts and bookmarks
+                const postsResponse = await axios.get<Post[]>(`${apiUrl}/posts`);
+                setPosts(postsResponse.data);
 
                 const bookmarksResponse = await axios.get<Bookmark[]>(`${apiUrl}/favorites/${userId}`);
                 setBookmarkedPostIds(bookmarksResponse.data.map((b) => b.post_id));
+
+                // Fetch user votes
+                const votesResponse = await axios.get<{ [key: string]: { postId: number; value: number } }>(
+                    `${apiUrl}/vote/${userId}`
+                );
+                const votesData = Array.isArray(votesResponse.data)
+                    ? votesResponse.data
+                    : Object.values(votesResponse.data); // Convert object to array if necessary
+                console.log('votesData:', votesData);
+
+                const votesMap = votesData.reduce((acc, vote) => {
+                    acc[vote.postId] = vote.value;
+                    return acc;
+                }, {} as { [key: number]: number });
+
+                setUserVotes(votesMap);
+
             } catch (err) {
+                console.error('Failed to fetch data:', err);
                 setError('Failed to fetch data');
-                console.error(err);
             } finally {
                 setLoading(false);
             }
         };
 
-        fetchPosts();
+        fetchPostsAndVotes();
     }, [userId]);
 
     const filteredPosts = useFilteredPosts(
@@ -116,7 +134,7 @@ const Collection: React.FC = () => {
     }
 
     return (
-        <div className="container mx-auto p-4 bg-gray-100">
+        <div className="container mx-auto p-4 bg-gray-100 mb-20">
             <div className="mb-4 flex flex-col sm:flex-row items-center justify-center sm:space-x-4">
                 <div className="w-full sm:w-64 mb-4 sm:mb-0">
                     <TagSelector tags={tags} onChange={handleTagChange} />
@@ -134,6 +152,7 @@ const Collection: React.FC = () => {
                 getYouTubeEmbedUrl={getYouTubeEmbedUrl}
                 handleUpvote={handleUpvote}
                 handleDownvote={handleDownvote}
+                userVotes={userVotes}
                             />
         </div>
     );
