@@ -44,6 +44,7 @@ const Collection: React.FC = () => {
         if (!userId) return;
 
         const fetchPostsAndVotes = async () => {
+            console.log(`${apiUrl}/vote/${userId}`);
             try {
                 // Fetch posts and bookmarks
                 const postsResponse = await axios.get<Post[]>(`${apiUrl}/posts`);
@@ -52,6 +53,7 @@ const Collection: React.FC = () => {
                 const bookmarksResponse = await axios.get<Bookmark[]>(`${apiUrl}/favorites/${userId}`);
                 setBookmarkedPostIds(bookmarksResponse.data.map((b) => b.post_id));
 
+                console.log('userId' + userId);
                 // Fetch user votes
                 const votesResponse = await axios.get<{ [key: string]: { postId: number; value: number } }>(
                     `${apiUrl}/vote/${userId}`

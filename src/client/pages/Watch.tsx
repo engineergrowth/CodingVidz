@@ -34,30 +34,41 @@ const Watch: React.FC = () => {
     const [selectedTagIds, setSelectedTagIds] = useState<number[]>([]);
     const [sortOption, setSortOption] = useState<string>('newest');
     const [selectedDescription, setSelectedDescription] = useState<string | null>(null);
+    const [userVotes, setUserVotes] = useState<{ [key: number]: number }>({});
+
     const { userId } = useUser();
     const { tags, error: tagsError } = useFetchTags();
     const apiUrl = import.meta.env.VITE_API_URL;
 
     useEffect(() => {
-        const fetchPosts = async () => {
+        const fetchPostsAndVotes = async () => {
             try {
-                const response = await axios.get<Post[]>(`${apiUrl}/posts`);
-                setPosts(response.data);
+                const postsResponse = await axios.get<Post[]>(`${apiUrl}/posts`);
+                setPosts(postsResponse.data);
 
                 if (userId) {
                     const bookmarksResponse = await axios.get<Bookmark[]>(`${apiUrl}/favorites/${userId}`);
                     setBookmarkedPostIds(bookmarksResponse.data.map((b) => b.post_id));
+
+                    const votesResponse = await axios.get<{ postId: number; value: number }[]>(
+                        `${apiUrl}/vote/${userId}`
+                    );
+                    const votesMap = votesResponse.data.reduce((acc, vote) => {
+                        acc[vote.postId] = vote.value;
+                        return acc;
+                    }, {} as { [key: number]: number });
+                    setUserVotes(votesMap);
                 }
             } catch (err) {
-                setError('Failed to fetch posts');
+                setError('Failed to fetch data');
                 console.error(err);
             } finally {
                 setLoading(false);
             }
         };
 
-        fetchPosts();
-    }, [userId]);
+        fetchPostsAndVotes();
+    }, [userId, apiUrl]);
 
     const filteredPosts = useFilteredPosts(posts, selectedTagIds, sortOption);
 
@@ -71,8 +82,13 @@ const Watch: React.FC = () => {
 
     const handleUpvote = async (postId: number) => {
         try {
-            await axios.post(`${apiUrl}/posts/${postId}/upvote`, { userId });
-            // TODO: Optionally update the UI or refetch posts
+            const newVoteValue = userVotes[postId] === 1 ? 0 : 1;
+            await axios.post(`${apiUrl}/vote`, {
+                postId,
+                userId,
+                value: newVoteValue,
+            });
+            setUserVotes((prev) => ({ ...prev, [postId]: newVoteValue })); // Update UI
         } catch (error) {
             console.error('Failed to upvote post:', error);
         }
@@ -80,8 +96,13 @@ const Watch: React.FC = () => {
 
     const handleDownvote = async (postId: number) => {
         try {
-            await axios.post(`${apiUrl}/posts/${postId}/downvote`, { userId });
-            // TODO: Optionally update the UI or refetch posts
+            const newVoteValue = userVotes[postId] === -1 ? 0 : -1; // Toggle between -1 and 0
+            await axios.post(`${apiUrl}/vote`, {
+                postId,
+                userId,
+                value: newVoteValue,
+            });
+            setUserVotes((prev) => ({ ...prev, [postId]: newVoteValue })); // Update UI
         } catch (error) {
             console.error('Failed to downvote post:', error);
         }
@@ -133,6 +154,7 @@ const Watch: React.FC = () => {
                 getYouTubeEmbedUrl={getYouTubeEmbedUrl}
                 handleUpvote={handleUpvote}
                 handleDownvote={handleDownvote}
+                userVotes={userVotes} // Pass voting data
             />
         </div>
     );
