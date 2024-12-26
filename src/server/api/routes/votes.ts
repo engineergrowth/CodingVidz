@@ -1,5 +1,5 @@
 import express from 'express';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, Vote } from '@prisma/client';
 
 const prisma = new PrismaClient();
 const router = express.Router();
@@ -8,6 +8,7 @@ const router = express.Router();
 router.post('/', async (req, res) => {
     const { postId, userId, value } = req.body;
 
+    // Validate vote value
     if (![1, -1].includes(value)) {
         return res.status(400).json({ error: 'Invalid vote value. Must be 1 or -1.' });
     }
@@ -35,7 +36,6 @@ router.post('/', async (req, res) => {
     }
 });
 
-
 // Get all votes for a user
 router.get('/:userId', async (req, res) => {
     const { userId } = req.params;
@@ -46,7 +46,10 @@ router.get('/:userId', async (req, res) => {
             select: { post_id: true, value: true },
         });
 
-        res.status(200).json(votes.map((vote) => ({ postId: vote.post_id, value: vote.value })));
+        res.status(200).json(votes.map((vote: { post_id: number; value: number }) => ({
+            postId: vote.post_id,
+            value: vote.value,
+        })));
     } catch (err) {
         console.error('Error fetching user votes:', err);
         res.status(500).json({ error: 'Failed to fetch user votes.' });
@@ -63,7 +66,7 @@ router.get('/post/:postId', async (req, res) => {
             _sum: { value: true },
         });
 
-        res.status(200).json({ score: voteCount._sum.value || 0 });
+        res.status(200).json({ score: voteCount._sum?.value || 0 });
     } catch (error) {
         console.error('Error fetching vote count:', error);
         res.status(500).json({ error: 'Failed to fetch vote count.' });
