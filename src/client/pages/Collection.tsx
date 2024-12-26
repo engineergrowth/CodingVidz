@@ -20,7 +20,6 @@ interface Post {
     created_at: string;
 }
 
-
 interface Bookmark {
     id: number;
     user_id: number;
@@ -33,61 +32,63 @@ const Collection: React.FC = () => {
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
     const [selectedTagIds, setSelectedTagIds] = useState<number[]>([]);
-    const [selectedDescription, setSelectedDescription] = useState<string | null>(null);
     const [userVotes, setUserVotes] = useState<{ [key: number]: number }>({});
     const [voteCounts, setVoteCounts] = useState<{ [key: number]: number }>({});
+    const [selectedDescription, setSelectedDescription] = useState<string | null>(null);
 
 
     const { userId } = useUser();
     const { tags, error: tagsError } = useFetchTags();
     const apiUrl = import.meta.env.VITE_API_URL;
 
-    const fetchAllVoteCounts = async () => {
+    const fetchVoteCount = async (postId: number) => {
         try {
-            const response = await axios.get<{ postId: number; score: number }[]>(`${apiUrl}/votes/all`);
-            const voteCountsMap = response.data.reduce((acc, vote) => {
-                acc[vote.postId] = vote.score;
-                return acc;
-            }, {} as { [key: number]: number });
-            setVoteCounts(voteCountsMap);
+            const response = await axios.get<{ score: number }>(`${apiUrl}/vote/post/${postId}`);
+            return response.data.score;
         } catch (error) {
-            console.error('Failed to fetch vote counts:', error);
+            console.error('Failed to fetch vote count:', error);
+            return 0; // Default to 0 on failure
         }
     };
 
     useEffect(() => {
-        if (!userId) return;
-
         const fetchPostsAndVotes = async () => {
             try {
-                // Fetch posts and bookmarks
                 const postsResponse = await axios.get<Post[]>(`${apiUrl}/posts`);
                 setPosts(postsResponse.data);
 
-                const bookmarksResponse = await axios.get<Bookmark[]>(`${apiUrl}/favorites/${userId}`);
-                setBookmarkedPostIds(bookmarksResponse.data.map((b) => b.post_id));
+                if (userId) {
+                    // Fetch votes and bookmarks
+                    const bookmarksResponse = await axios.get<Bookmark[]>(`${apiUrl}/favorites/${userId}`);
+                    setBookmarkedPostIds(bookmarksResponse.data.map((b) => b.post_id));
 
-                // Fetch user votes
-                const votesResponse = await axios.get<{ postId: number; value: number }[]>(`${apiUrl}/vote/${userId}`);
-                const votesMap = votesResponse.data.reduce((acc, vote) => {
-                    acc[vote.postId] = vote.value;
-                    return acc;
-                }, {} as { [key: number]: number });
-                setUserVotes(votesMap);
+                    const votesResponse = await axios.get<{ postId: number; value: number }[]>(`${apiUrl}/vote/${userId}`);
+                    const votesMap = votesResponse.data.reduce((acc, vote) => {
+                        acc[vote.postId] = vote.value;
+                        return acc;
+                    }, {} as { [key: number]: number });
+                    setUserVotes(votesMap);
 
-                // Fetch total vote counts
-                await fetchAllVoteCounts();
+                    // Fetch total vote count for each post
+                    const totalVotes = await Promise.all(
+                        postsResponse.data.map((post) => fetchVoteCount(post.id))
+                    );
+                    const voteCountsMap = postsResponse.data.reduce((acc, post, idx) => {
+                        acc[post.id] = totalVotes[idx];
+                        return acc;
+                    }, {} as { [key: number]: number });
+                    setVoteCounts(voteCountsMap);
+                }
             } catch (err) {
-                console.error('Failed to fetch data:', err);
                 setError('Failed to fetch data');
+                console.error(err);
             } finally {
                 setLoading(false);
             }
         };
 
         fetchPostsAndVotes();
-    }, [userId]);
-
+    }, [userId, apiUrl]);
 
     const filteredPosts = useFilteredPosts(
         posts.filter((post) => bookmarkedPostIds.includes(post.id)),
@@ -101,14 +102,13 @@ const Collection: React.FC = () => {
 
     const handleUpvote = async (postId: number) => {
         try {
-            const newVoteValue = userVotes[postId] === 1 ? 0 : 1; // Toggle between 1 and 0
+            const newVoteValue = userVotes[postId] === 1 ? 0 : 1;
             await axios.post(`${apiUrl}/vote`, {
                 postId,
                 userId,
-                value: newVoteValue, // Send 1 to upvote or 0 to remove the vote
+                value: newVoteValue,
             });
-            // Update the UI state
-            setUserVotes((prev) => ({ ...prev, [postId]: newVoteValue }));
+            setUserVotes((prev) => ({ ...prev, [postId]: newVoteValue })); // Update UI
         } catch (error) {
             console.error('Failed to handle upvote:', error);
         }
@@ -116,20 +116,17 @@ const Collection: React.FC = () => {
 
     const handleDownvote = async (postId: number) => {
         try {
-            const newVoteValue = userVotes[postId] === -1 ? 0 : -1; // Toggle between -1 and 0
+            const newVoteValue = userVotes[postId] === -1 ? 0 : -1;
             await axios.post(`${apiUrl}/vote`, {
                 postId,
                 userId,
-                value: newVoteValue, // Send -1 to downvote or 0 to remove the vote
+                value: newVoteValue,
             });
-            // Update the UI state
-            setUserVotes((prev) => ({ ...prev, [postId]: newVoteValue }));
+            setUserVotes((prev) => ({ ...prev, [postId]: newVoteValue })); // Update UI
         } catch (error) {
             console.error('Failed to handle downvote:', error);
         }
     };
-
-
 
     if (loading) {
         return (
@@ -164,11 +161,10 @@ const Collection: React.FC = () => {
                 handleDownvote={handleDownvote}
                 userVotes={userVotes}
                 voteCounts={voteCounts}
+            />
 
-                            />
         </div>
     );
 };
 
 export default Collection;
-
