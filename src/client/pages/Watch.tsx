@@ -35,10 +35,23 @@ const Watch: React.FC = () => {
     const [sortOption, setSortOption] = useState<string>('newest');
     const [selectedDescription, setSelectedDescription] = useState<string | null>(null);
     const [userVotes, setUserVotes] = useState<{ [key: number]: number }>({});
+    const [voteCounts, setVoteCounts] = useState<{ [key: number]: number }>({});
+
 
     const { userId } = useUser();
     const { tags, error: tagsError } = useFetchTags();
     const apiUrl = import.meta.env.VITE_API_URL;
+
+    const fetchVoteCount = async (postId: number) => {
+        try {
+            const response = await axios.get<{ score: number }>(`${apiUrl}/vote/post/${postId}`);
+            return response.data.score;
+        } catch (error) {
+            console.error('Failed to fetch vote count:', error);
+            return 0; // Default to 0 in case of error
+        }
+    };
+
 
     useEffect(() => {
         const fetchPostsAndVotes = async () => {
@@ -47,17 +60,26 @@ const Watch: React.FC = () => {
                 setPosts(postsResponse.data);
 
                 if (userId) {
+                    // Fetch votes and bookmarks
                     const bookmarksResponse = await axios.get<Bookmark[]>(`${apiUrl}/favorites/${userId}`);
                     setBookmarkedPostIds(bookmarksResponse.data.map((b) => b.post_id));
 
-                    const votesResponse = await axios.get<{ postId: number; value: number }[]>(
-                        `${apiUrl}/vote/${userId}`
-                    );
+                    const votesResponse = await axios.get<{ postId: number; value: number }[]>(`${apiUrl}/vote/${userId}`);
                     const votesMap = votesResponse.data.reduce((acc, vote) => {
                         acc[vote.postId] = vote.value;
                         return acc;
                     }, {} as { [key: number]: number });
                     setUserVotes(votesMap);
+
+                    // Fetch total vote count for each post
+                    const totalVotes = await Promise.all(
+                        postsResponse.data.map((post) => fetchVoteCount(post.id))
+                    );
+                    const voteCountsMap = postsResponse.data.reduce((acc, post, idx) => {
+                        acc[post.id] = totalVotes[idx];
+                        return acc;
+                    }, {} as { [key: number]: number });
+                    setVoteCounts(voteCountsMap);
                 }
             } catch (err) {
                 setError('Failed to fetch data');
@@ -69,6 +91,7 @@ const Watch: React.FC = () => {
 
         fetchPostsAndVotes();
     }, [userId, apiUrl]);
+
 
     const filteredPosts = useFilteredPosts(posts, selectedTagIds, sortOption);
 
@@ -154,7 +177,8 @@ const Watch: React.FC = () => {
                 getYouTubeEmbedUrl={getYouTubeEmbedUrl}
                 handleUpvote={handleUpvote}
                 handleDownvote={handleDownvote}
-                userVotes={userVotes} // Pass voting data
+                userVotes={userVotes}
+                voteCounts={voteCounts}
             />
         </div>
     );

@@ -31,6 +31,7 @@ interface PostGridProps {
     handleUpvote: (postId: number) => void;
     handleDownvote: (postId: number) => void;
     userVotes: { [key: number]: number };
+    voteCounts: { [key: number]: number };
 }
 
 const PostGrid: React.FC<PostGridProps> = ({
@@ -44,6 +45,7 @@ const PostGrid: React.FC<PostGridProps> = ({
                                                handleUpvote,
                                                handleDownvote,
                                                userVotes,
+                                               voteCounts,
                                            }) => {
     return (
         <>
@@ -125,7 +127,10 @@ const PostGrid: React.FC<PostGridProps> = ({
                                                 }`}
                                                 onClick={() => handleUpvote(post.id)}
                                             />
+                                            <span
+                                                className="text-sm font-semibold text-gray-800">{voteCounts[post.id] || 0}</span>
 
+                                            {/* Vote count */}
                                             {/* Downvote */}
                                             <FontAwesomeIcon
                                                 icon={faArrowDown}

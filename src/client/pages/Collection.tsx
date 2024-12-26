@@ -35,16 +35,30 @@ const Collection: React.FC = () => {
     const [selectedTagIds, setSelectedTagIds] = useState<number[]>([]);
     const [selectedDescription, setSelectedDescription] = useState<string | null>(null);
     const [userVotes, setUserVotes] = useState<{ [key: number]: number }>({});
+    const [voteCounts, setVoteCounts] = useState<{ [key: number]: number }>({});
+
 
     const { userId } = useUser();
     const { tags, error: tagsError } = useFetchTags();
     const apiUrl = import.meta.env.VITE_API_URL;
 
+    const fetchAllVoteCounts = async () => {
+        try {
+            const response = await axios.get<{ postId: number; score: number }[]>(`${apiUrl}/votes/all`);
+            const voteCountsMap = response.data.reduce((acc, vote) => {
+                acc[vote.postId] = vote.score;
+                return acc;
+            }, {} as { [key: number]: number });
+            setVoteCounts(voteCountsMap);
+        } catch (error) {
+            console.error('Failed to fetch vote counts:', error);
+        }
+    };
+
     useEffect(() => {
         if (!userId) return;
 
         const fetchPostsAndVotes = async () => {
-            console.log(`${apiUrl}/vote/${userId}`);
             try {
                 // Fetch posts and bookmarks
                 const postsResponse = await axios.get<Post[]>(`${apiUrl}/posts`);
@@ -53,23 +67,16 @@ const Collection: React.FC = () => {
                 const bookmarksResponse = await axios.get<Bookmark[]>(`${apiUrl}/favorites/${userId}`);
                 setBookmarkedPostIds(bookmarksResponse.data.map((b) => b.post_id));
 
-                console.log('userId' + userId);
                 // Fetch user votes
-                const votesResponse = await axios.get<{ [key: string]: { postId: number; value: number } }>(
-                    `${apiUrl}/vote/${userId}`
-                );
-                const votesData = Array.isArray(votesResponse.data)
-                    ? votesResponse.data
-                    : Object.values(votesResponse.data); // Convert object to array if necessary
-                console.log('votesData:', votesData);
-
-                const votesMap = votesData.reduce((acc, vote) => {
+                const votesResponse = await axios.get<{ postId: number; value: number }[]>(`${apiUrl}/vote/${userId}`);
+                const votesMap = votesResponse.data.reduce((acc, vote) => {
                     acc[vote.postId] = vote.value;
                     return acc;
                 }, {} as { [key: number]: number });
-
                 setUserVotes(votesMap);
 
+                // Fetch total vote counts
+                await fetchAllVoteCounts();
             } catch (err) {
                 console.error('Failed to fetch data:', err);
                 setError('Failed to fetch data');
@@ -80,6 +87,7 @@ const Collection: React.FC = () => {
 
         fetchPostsAndVotes();
     }, [userId]);
+
 
     const filteredPosts = useFilteredPosts(
         posts.filter((post) => bookmarkedPostIds.includes(post.id)),
@@ -155,6 +163,8 @@ const Collection: React.FC = () => {
                 handleUpvote={handleUpvote}
                 handleDownvote={handleDownvote}
                 userVotes={userVotes}
+                voteCounts={voteCounts}
+
                             />
         </div>
     );
