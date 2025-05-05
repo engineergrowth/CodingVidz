@@ -36,8 +36,6 @@ The application uses a **Prisma**-designed schema to manage the database. Key mo
 ![Video Page Screenshot](./public/screenshot.png)
 
 
-## Contributing
 
-Feel free to fork this repository, submit issues, and send pull requests. We would love it if you shared your bookmarks with us as well! Contributions are always welcome!
 
 
