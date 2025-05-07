@@ -7,8 +7,12 @@
   - Add one or multiple tags to videos.
   - Discover videos by filtering based on one or more tags.
 
+- **Voting System**:
+  - Upvote or downvote videos to surface the best content.
+    
 - **Video Collection**:  
   - Bookmark videos you like or plan to watch later, and organize your collection efficiently.
+    
 - **CRUD Operations on Videos**:  
   - Edit and delete your video posts.
 
@@ -29,6 +33,7 @@ The application uses a **Prisma**-designed schema to manage the database. Key mo
 - **Video**: Stores video details, including the title, URL, description, and associated tags.
 - **Tag**: A tag model to categorize videos.
 - **Bookmark**: Allows users to save and organize their favorite videos.
+- **Votes**: Keeps track of votes on content
 
 ## Screenshots
 
